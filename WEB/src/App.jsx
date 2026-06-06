@@ -141,9 +141,15 @@ export default function App() {
   // Session & Auth Database State
   const [currentUser, setCurrentUser] = useState(() => {
     const localSession = localStorage.getItem("pertap_session");
-    if (localSession) return JSON.parse(localSession);
+    if (localSession) {
+      const parsed = JSON.parse(localSession);
+      return parsed.user ? parsed.user : parsed;
+    }
     const tabSession = sessionStorage.getItem("pertap_session");
-    if (tabSession) return JSON.parse(tabSession);
+    if (tabSession) {
+      const parsed = JSON.parse(tabSession);
+      return parsed.user ? parsed.user : parsed;
+    }
     return null;
   });
   
@@ -158,6 +164,7 @@ export default function App() {
   // Register fields
   const [registerName, setRegisterName] = useState("");
   const [registerEmail, setRegisterEmail] = useState("");
+  const [registerUsername, setRegisterUsername] = useState("");
   const [registerPassword, setRegisterPassword] = useState("");
 
   // Edit Dashboard fields state
@@ -218,8 +225,13 @@ export default function App() {
     const fetchProfile = async () => {
       setIsLoading(true);
       try {
-        const email = currentUser ? currentUser.email : "default";
-        const res = await fetch(`/api/profile/${email}`);
+        const session = localStorage.getItem("pertap_session") || sessionStorage.getItem("pertap_session");
+        const token = session ? JSON.parse(session).token : null;
+        const username = currentUser ? currentUser.username : "default";
+        
+        const res = await fetch(`/api/profile/${username}`, {
+          headers: token ? { "Authorization": `Bearer ${token}` } : {}
+        });
         if (res.ok) {
           const data = await res.json();
           setActiveProfile(data);
@@ -239,17 +251,42 @@ export default function App() {
   }, [currentUser]);
 
   // Real database-backed history and leaderboard fetching helpers
-  const fetchHistoryEvents = async (email) => {
-    if (!email) return;
+  const fetchHistoryEvents = async (username) => {
+    if (!username) return;
     setIsHistoryLoading(true);
     try {
-      const res = await fetch(`/api/history/${email}`);
+      const session = localStorage.getItem("pertap_session") || sessionStorage.getItem("pertap_session");
+      const token = session ? JSON.parse(session).token : null;
+      const res = await fetch("/api/analytics", {
+        headers: token ? { "Authorization": `Bearer ${token}` } : {}
+      });
       if (res.ok) {
         const data = await res.json();
-        setHistoryEvents(data);
+        
+        // Compile history logs from analytics clicks and views
+        const viewsList = (data.recentViews || []).map(v => ({
+          id: `view-${v.id}`,
+          action: "Card tapped / viewed",
+          details: `Visitor from ${v.country_code === 'unknown' ? 'Unknown Location' : v.country_code} using a ${v.device_type} device.`,
+          icon: "Globe",
+          color: "#10b981",
+          created_at: v.viewed_at
+        }));
+        
+        const clicksList = (data.recentClicks || []).map(c => ({
+          id: `click-${c.id}`,
+          action: "Social link clicked",
+          details: `Opened link to ${c.platform} using a ${c.device_type} device.`,
+          icon: "Link",
+          color: "#8b5cf6",
+          created_at: c.clicked_at
+        }));
+        
+        const mergedList = [...viewsList, ...clicksList].sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+        setHistoryEvents(mergedList);
       }
     } catch (err) {
-      console.error("Failed to fetch history events:", err);
+      console.error("Failed to fetch analytics history events:", err);
     } finally {
       setIsHistoryLoading(false);
     }
@@ -273,26 +310,20 @@ export default function App() {
   // Sync tab loading effects
   useEffect(() => {
     if (activeTab === "history") {
-      fetchHistoryEvents(activeProfile.email || (currentUser ? currentUser.email : "default"));
+      fetchHistoryEvents(activeProfile.username || (currentUser ? currentUser.username : "default"));
     } else if (activeTab === "leaderboard") {
       fetchLeaderboard();
     }
-  }, [activeTab, activeProfile.email, currentUser]);
+  }, [activeTab, currentUser]);
 
   // Social link connection click tracker
   const handleSocialClick = async (social) => {
-    const email = activeProfile.email || (currentUser ? currentUser.email : "default");
+    const username = activeProfile.username || (currentUser ? currentUser.username : "default");
     try {
-      await fetch("/api/history", {
+      await fetch(`/api/profile/${username}/click`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          email: email,
-          action: `${social.platform} Checked`,
-          details: `Clicked link to ${social.handle || social.platform}`,
-          icon: social.icon,
-          color: social.color
-        })
+        body: JSON.stringify({ platform: social.platform })
       });
     } catch (err) {
       console.error("Failed to log social click:", err);
@@ -312,8 +343,8 @@ export default function App() {
     setDiamonds(prev => prev + 1);
     
     try {
-      const email = activeProfile.email || (currentUser ? currentUser.email : "default");
-      const res = await fetch(`/api/profile/${email}/diamond`, {
+      const username = activeProfile.username || (currentUser ? currentUser.username : "default");
+      const res = await fetch(`/api/profile/${username}/tap`, {
         method: "POST"
       });
       if (res.ok) {
@@ -326,7 +357,7 @@ export default function App() {
   };
 
   const handleCopyLink = () => {
-    const copyUrl = `${window.location.protocol}//${window.location.host}/nfc/?email=${encodeURIComponent(activeProfile.email || currentUser.email)}`;
+    const copyUrl = `${window.location.protocol}//${window.location.host}/nfc/${activeProfile.username || currentUser.username}`;
     navigator.clipboard.writeText(copyUrl);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
@@ -342,7 +373,7 @@ export default function App() {
     }, 4000);
   };
 
-  // Login action handler (hits SQLite REST endpoint)
+  // Login action handler (hits Vercel Serverless Endpoint)
   const handleLogin = async (e) => {
     e.preventDefault();
     setAuthError("");
@@ -360,14 +391,14 @@ export default function App() {
         return;
       }
       
-      const user = data.user;
+      const sessionData = { user: data.user, token: data.token };
       if (rememberMe) {
-        localStorage.setItem("pertap_session", JSON.stringify(user));
+        localStorage.setItem("pertap_session", JSON.stringify(sessionData));
       } else {
-        sessionStorage.setItem("pertap_session", JSON.stringify(user));
+        sessionStorage.setItem("pertap_session", JSON.stringify(sessionData));
       }
       
-      setCurrentUser(user);
+      setCurrentUser(data.user);
       setLoginEmail("");
       setLoginPassword("");
       setActiveTab("home");
@@ -377,12 +408,12 @@ export default function App() {
     }
   };
 
-  // Registration action handler (hits SQLite REST endpoint)
+  // Registration action handler (hits Vercel Serverless Endpoint)
   const handleRegister = async (e) => {
     e.preventDefault();
     setAuthError("");
     
-    if (!registerName.trim() || !registerEmail.trim() || !registerPassword) {
+    if (!registerName.trim() || !registerEmail.trim() || !registerUsername.trim() || !registerPassword) {
       setAuthError("All fields are required.");
       return;
     }
@@ -391,7 +422,12 @@ export default function App() {
       const res = await fetch("/api/auth/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name: registerName, email: registerEmail, password: registerPassword })
+        body: JSON.stringify({ 
+          name: registerName, 
+          email: registerEmail, 
+          username: registerUsername,
+          password: registerPassword 
+        })
       });
       
       const data = await res.json();
@@ -400,13 +436,23 @@ export default function App() {
         return;
       }
       
-      const user = data.user;
-      // Auto login after sign up as temporary tab session
-      sessionStorage.setItem("pertap_session", JSON.stringify(user));
-      setCurrentUser(user);
+      // Auto login after sign up
+      const loginRes = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: registerEmail, password: registerPassword })
+      });
+      
+      if (loginRes.ok) {
+        const loginData = await loginRes.json();
+        const sessionData = { user: loginData.user, token: loginData.token };
+        sessionStorage.setItem("pertap_session", JSON.stringify(sessionData));
+        setCurrentUser(loginData.user);
+      }
       
       setRegisterName("");
       setRegisterEmail("");
+      setRegisterUsername("");
       setRegisterPassword("");
       setActiveTab("home");
     } catch (err) {
@@ -492,10 +538,15 @@ export default function App() {
     };
     
     try {
-      const res = await fetch("/api/profile", {
+      const session = localStorage.getItem("pertap_session") || sessionStorage.getItem("pertap_session");
+      const token = session ? JSON.parse(session).token : null;
+      const res = await fetch("/api/profile/update", {
         method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: currentUser.email, profileData: updatedProfile })
+        headers: { 
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`
+        },
+        body: JSON.stringify({ profileData: updatedProfile })
       });
       
       const data = await res.json();
@@ -916,6 +967,17 @@ export default function App() {
                 placeholder="Mohammed Nibras"
                 value={registerName}
                 onChange={e => setRegisterName(e.target.value)}
+                required
+              />
+            </div>
+            <div className="form-group">
+              <label className="form-label">Username</label>
+              <input 
+                type="text" 
+                className="form-input" 
+                placeholder="nibras"
+                value={registerUsername}
+                onChange={e => setRegisterUsername(e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, ''))}
                 required
               />
             </div>
@@ -1605,7 +1667,7 @@ export default function App() {
               marginBottom: "10px"
             }}>
               <span style={{ fontSize: "0.78rem", color: "var(--text-muted)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", flex: 1, textAlign: "left" }}>
-                {window.location.host || "pertap.com"}/nfc/?email={encodeURIComponent(activeProfile.email || currentUser.email)}
+                {window.location.host || "pertap.com"}/nfc/{activeProfile.username || currentUser.username}
               </span>
               <button 
                 onClick={handleCopyLink}

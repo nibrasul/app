@@ -4,25 +4,24 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "server": "nodemon server.js",
-    "client": "vite",
-    "dev": "concurrently \"npm run server\" \"npm run client\"",
+    "dev": "concurrently \"node dev-server.js\" \"vite\"",
     "build": "vite build",
     "lint": "eslint .",
     "preview": "vite preview"
   },
   "dependencies": {
+    "bcryptjs": "^2.4.3",
     "cors": "^2.8.6",
     "dotenv": "^17.4.2",
     "express": "^5.2.1",
+    "jsonwebtoken": "^9.0.2",
     "lucide-react": "^1.17.0",
     "pg": "^8.21.0",
     "react": "^19.2.6",
-    "react-dom": "^19.2.6",
-    "sqlite": "^5.1.1",
-    "sqlite3": "^6.0.1"
+    "react-dom": "^19.2.6"
   },
   "devDependencies": {
+    "@vercel/node": "^3.2.26",
     "@eslint/js": "^10.0.1",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",

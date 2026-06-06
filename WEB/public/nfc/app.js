@@ -1,6 +1,22 @@
-// Get email from URL query parameter
+// Parse username dynamically from URL paths or query params (supports /nfc/username, ?username=..., ?email=...)
 const params = new URLSearchParams(window.location.search);
-const email = params.get("email");
+let username = params.get("username");
+if (!username) {
+  const paths = window.location.pathname.split('/');
+  const nfcIndex = paths.indexOf('nfc');
+  if (nfcIndex !== -1 && paths[nfcIndex + 1]) {
+    username = paths[nfcIndex + 1];
+  }
+}
+if (!username) {
+  const emailParam = params.get("email");
+  if (emailParam) {
+    username = emailParam.split('@')[0];
+  }
+}
+if (!username) {
+  username = "default";
+}
 
 // SVG icon maps for Profile Tags
 const TAG_ICONS = {
@@ -40,8 +56,7 @@ const DEFAULT_BRAND_COLORS = {
 // Load profile data from API
 async function loadProfile() {
   try {
-    const activeEmail = email || "default"; // Fallback to fetching default Abhinand data
-    const response = await fetch(`/api/profile/${activeEmail}`);
+    const response = await fetch(`/api/profile/${username}`);
 
     if (!response.ok) {
       throw new Error("Profile details not found");
@@ -177,9 +192,8 @@ async function loadProfile() {
       e.preventDefault();
       e.stopPropagation();
       
-      const emailParam = email || "abhinand"; // Fallback to incrementing Abhinand's score in default preview
       try {
-        const res = await fetch(`/api/profile/${emailParam}/diamond`, {
+        const res = await fetch(`/api/profile/${username}/tap`, {
           method: "POST"
         });
         if (res.ok) {

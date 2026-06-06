@@ -1,4 +1,0 @@
-{
-  "watch": ["server.js"],
-  "ignore": ["database.sqlite", "database.sqlite-journal", "database.sqlite-wal", "node_modules/**"]
-}
