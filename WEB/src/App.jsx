@@ -513,7 +513,7 @@ export default function App() {
 
   const compressBase64Image = (base64Str, maxSize = 250) => {
     return new Promise((resolve) => {
-      if (!base64Str || !base64Str.startsWith('data:image/') || base64Str.length < 100000) {
+      if (!base64Str || !base64Str.startsWith('data:') || !base64Str.includes('base64,') || base64Str.length < 100000) {
         resolve(base64Str);
         return;
       }
