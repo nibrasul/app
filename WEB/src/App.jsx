@@ -1,15 +1,15 @@
 import { useState, useEffect } from "react";
 import { profileData } from "./profileData.js";
-import { 
-  ChevronRight, 
-  Code, 
-  Sparkles, 
-  MapPin, 
-  Plus, 
-  Home, 
-  Clock, 
-  Trophy, 
-  User, 
+import {
+  ChevronRight,
+  Code,
+  Sparkles,
+  MapPin,
+  Plus,
+  Home,
+  Clock,
+  Trophy,
+  User,
   Gem,
   Check,
   Copy,
@@ -36,7 +36,7 @@ const LinkedinLogo = () => (
 
 const TelegramLogo = () => (
   <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
-    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15.82-.7 3.99-.98 5.51-.12.64-.35.85-.58.87-.5.05-.88-.31-1.36-.63-.76-.49-1.18-.8-1.92-1.28-.85-.56-.3-.87.19-1.37.13-.13 2.33-2.14 2.37-2.31.01-.02.01-.1-.05-.15-.06-.05-.14-.03-.21-.02-.09.02-1.58 1.01-4.48 2.96-.42.29-.8.43-1.15.42-.38-.01-1.11-.22-1.65-.39-.66-.22-1.19-.33-1.14-.7.02-.19.28-.39.77-.59 3.02-1.31 5.03-2.18 6.03-2.6 2.87-1.2 3.46-1.41 3.85-1.41.09 0 .28.02.4.12.1.09.13.22.14.32-.01.07-.01.17-.02.24z"/>
+    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15.82-.7 3.99-.98 5.51-.12.64-.35.85-.58.87-.5.05-.88-.31-1.36-.63-.76-.49-1.18-.8-1.92-1.28-.85-.56-.3-.87.19-1.37.13-.13 2.33-2.14 2.37-2.31.01-.02.01-.1-.05-.15-.06-.05-.14-.03-.21-.02-.09.02-1.58 1.01-4.48 2.96-.42.29-.8.43-1.15.42-.38-.01-1.11-.22-1.65-.39-.66-.22-1.19-.33-1.14-.7.02-.19.28-.39.77-.59 3.02-1.31 5.03-2.18 6.03-2.6 2.87-1.2 3.46-1.41 3.85-1.41.09 0 .28.02.4.12.1.09.13.22.14.32-.01.07-.01.17-.02.24z" />
   </svg>
 );
 
@@ -48,7 +48,7 @@ const BehanceLogo = () => (
 
 const WhatsappLogo = () => (
   <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
-    <path d="M12.012 2c-5.506 0-9.988 4.482-9.988 9.988 0 1.758.459 3.473 1.332 4.985L2 22l5.161-1.353a9.924 9.924 0 0 0 4.851 1.264h.004c5.502 0 9.988-4.486 9.988-9.992C22 6.482 17.514 2 12.012 2zm6.6 14.18c-.272.761-1.358 1.391-2.222 1.472-.614.056-1.411.082-2.28-.201a10.376 10.376 0 0 1-4.708-3.085A10.741 10.741 0 0 1 6.8 9.873c-.534-.916-.848-1.99-.39-2.584.228-.294.61-.692.915-.997.112-.112.224-.224.305-.305.244-.244.407-.366.57-.366.162 0 .325.081.447.325.326.65.773 1.83.854 1.993.082.163.136.353.027.57-.109.217-.163.353-.326.543-.163.19-.325.38-.488.57-.163.163-.353.353-.136.733.217.38.978 1.628 2.092 2.617 1.438 1.276 2.661 1.683 3.04 1.873.38.19.61.163.827-.081.217-.244.923-1.072 1.168-1.439.244-.366.488-.3.814-.177.325.122 2.062 1.018 2.415 1.194.353.177.585.258.667.407.082.149.082.855-.19 1.616z"/>
+    <path d="M12.012 2c-5.506 0-9.988 4.482-9.988 9.988 0 1.758.459 3.473 1.332 4.985L2 22l5.161-1.353a9.924 9.924 0 0 0 4.851 1.264h.004c5.502 0 9.988-4.486 9.988-9.992C22 6.482 17.514 2 12.012 2zm6.6 14.18c-.272.761-1.358 1.391-2.222 1.472-.614.056-1.411.082-2.28-.201a10.376 10.376 0 0 1-4.708-3.085A10.741 10.741 0 0 1 6.8 9.873c-.534-.916-.848-1.99-.39-2.584.228-.294.61-.692.915-.997.112-.112.224-.224.305-.305.244-.244.407-.366.57-.366.162 0 .325.081.447.325.326.65.773 1.83.854 1.993.082.163.136.353.027.57-.109.217-.163.353-.326.543-.163.19-.325.38-.488.57-.163.163-.353.353-.136.733.217.38.978 1.628 2.092 2.617 1.438 1.276 2.661 1.683 3.04 1.873.38.19.61.163.827-.081.217-.244.923-1.072 1.168-1.439.244-.366.488-.3.814-.177.325.122 2.062 1.018 2.415 1.194.353.177.585.258.667.407.082.149.082.855-.19 1.616z" />
   </svg>
 );
 
@@ -124,13 +124,13 @@ export default function App() {
   const [diamonds, setDiamonds] = useState(parseInt(profileData.diamonds));
   const [showShareModal, setShowShareModal] = useState(false);
   const [copied, setCopied] = useState(false);
-  
+
   // Real database-backed history and leaderboard states
   const [historyEvents, setHistoryEvents] = useState([]);
   const [leaderboardData, setLeaderboardData] = useState([]);
   const [isHistoryLoading, setIsHistoryLoading] = useState(false);
   const [isLeaderboardLoading, setIsLeaderboardLoading] = useState(false);
-  
+
   // Session & Auth Database State
   const [currentUser, setCurrentUser] = useState(() => {
     const localSession = localStorage.getItem("pertap_session");
@@ -145,15 +145,15 @@ export default function App() {
     }
     return null;
   });
-  
+
   const [authMode, setAuthMode] = useState("login"); // "login" | "register"
   const [authError, setAuthError] = useState("");
   const [rememberMe, setRememberMe] = useState(false);
-  
+
   // Login fields
   const [loginEmail, setLoginEmail] = useState("");
   const [loginPassword, setLoginPassword] = useState("");
-  
+
   // Register fields
   const [registerName, setRegisterName] = useState("");
   const [registerEmail, setRegisterEmail] = useState("");
@@ -194,7 +194,7 @@ export default function App() {
     setEditLocation(profile.tags.find(t => t.type === "location")?.text || "");
     setEditTag1(profile.tags.filter(t => t.type === "role")[0]?.text || "");
     setEditTag2(profile.tags.filter(t => t.type === "role")[1]?.text || "");
-    
+
     const instagram = profile.socials.find(s => s.platform === "Instagram")?.handle || "";
     const linkedin = profile.socials.find(s => s.platform === "LinkedIn")?.handle || "";
     const telegram = profile.socials.find(s => s.platform === "Telegram")?.handle || "";
@@ -202,7 +202,7 @@ export default function App() {
     const cv = profile.socials.find(s => s.platform === "Download My CV / Resume")?.handle || "";
     const portfolio = profile.socials.find(s => s.platform === "Portfolio Link")?.handle || "";
     const behance = profile.socials.find(s => s.platform === "Behance")?.handle || "";
-    
+
     setEditInstagram(instagram);
     setEditLinkedin(linkedin);
     setEditTelegram(telegram);
@@ -210,7 +210,7 @@ export default function App() {
     setEditCv(cv);
     setEditPortfolio(portfolio);
     setEditBehance(behance);
-    
+
     setEditQuoteText(profile.quote.text || "");
     setEditIsPremium(profile.isPremium || false);
   };
@@ -223,7 +223,7 @@ export default function App() {
         const session = localStorage.getItem("pertap_session") || sessionStorage.getItem("pertap_session");
         const token = session ? JSON.parse(session).token : null;
         const username = currentUser ? currentUser.username : "default";
-        
+
         const res = await fetch(`/api/profile/${username}`, {
           headers: token ? { "Authorization": `Bearer ${token}` } : {}
         });
@@ -259,7 +259,7 @@ export default function App() {
     };
 
     fetchProfile();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentUser]);
 
   // Real database-backed history and leaderboard fetching helpers
@@ -274,7 +274,7 @@ export default function App() {
       });
       if (res.ok) {
         const data = await res.json();
-        
+
         // Compile history logs from analytics clicks and views
         const viewsList = (data.recentViews || []).map(v => ({
           id: `view-${v.id}`,
@@ -284,7 +284,7 @@ export default function App() {
           color: "#10b981",
           created_at: v.viewed_at
         }));
-        
+
         const clicksList = (data.recentClicks || []).map(c => ({
           id: `click-${c.id}`,
           action: "Social link clicked",
@@ -293,7 +293,7 @@ export default function App() {
           color: "#8b5cf6",
           created_at: c.clicked_at
         }));
-        
+
         const mergedList = [...viewsList, ...clicksList].sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
         setHistoryEvents(mergedList);
       }
@@ -358,7 +358,7 @@ export default function App() {
   const handleDiamondClick = async () => {
     // Optimistic update
     setDiamonds(prev => prev + 1);
-    
+
     try {
       const username = activeProfile.username || (currentUser ? currentUser.username : "default");
       const res = await fetch(`/api/profile/${username}/tap`, {
@@ -384,27 +384,27 @@ export default function App() {
   const handleLogin = async (e) => {
     e.preventDefault();
     setAuthError("");
-    
+
     try {
       const res = await fetch("/api/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email: loginEmail, password: loginPassword })
       });
-      
+
       const data = await res.json();
       if (!res.ok) {
         setAuthError(data.error || "Login failed.");
         return;
       }
-      
+
       const sessionData = { user: data.user, token: data.token };
       if (rememberMe) {
         localStorage.setItem("pertap_session", JSON.stringify(sessionData));
       } else {
         sessionStorage.setItem("pertap_session", JSON.stringify(sessionData));
       }
-      
+
       setCurrentUser(data.user);
       setLoginEmail("");
       setLoginPassword("");
@@ -419,44 +419,44 @@ export default function App() {
   const handleRegister = async (e) => {
     e.preventDefault();
     setAuthError("");
-    
+
     if (!registerName.trim() || !registerEmail.trim() || !registerUsername.trim() || !registerPassword) {
       setAuthError("All fields are required.");
       return;
     }
-    
+
     try {
       const res = await fetch("/api/auth/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ 
-          name: registerName, 
-          email: registerEmail, 
+        body: JSON.stringify({
+          name: registerName,
+          email: registerEmail,
           username: registerUsername,
-          password: registerPassword 
+          password: registerPassword
         })
       });
-      
+
       const data = await res.json();
       if (!res.ok) {
         setAuthError(data.error || "Registration failed.");
         return;
       }
-      
+
       // Auto login after sign up
       const loginRes = await fetch("/api/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email: registerEmail, password: registerPassword })
       });
-      
+
       if (loginRes.ok) {
         const loginData = await loginRes.json();
         const sessionData = { user: loginData.user, token: loginData.token };
         sessionStorage.setItem("pertap_session", JSON.stringify(sessionData));
         setCurrentUser(loginData.user);
       }
-      
+
       setRegisterName("");
       setRegisterEmail("");
       setRegisterUsername("");
@@ -476,13 +476,29 @@ export default function App() {
   };
 
   const getAuthToken = () => {
+    // Try both storage locations
     const session = localStorage.getItem("pertap_session") || sessionStorage.getItem("pertap_session");
-    if (!session) return null;
+
+    if (!session) {
+      console.error("[Auth] No session found in localStorage or sessionStorage");
+      return null;
+    }
 
     try {
-      return JSON.parse(session).token || null;
+      const parsed = JSON.parse(session);
+
+      // Check different possible token locations
+      const token = parsed.token || parsed.accessToken || (parsed.user?.token);
+
+      if (!token) {
+        console.error("[Auth] Session exists but no token found. Session keys:", Object.keys(parsed));
+        return null;
+      }
+
+      console.log("[Auth] Token retrieved successfully, length:", token.length);
+      return token;
     } catch (err) {
-      console.error("Failed to parse stored session:", err);
+      console.error("[Auth] Failed to parse session:", err);
       return null;
     }
   };
@@ -568,45 +584,77 @@ export default function App() {
   async function uploadImageDataUrl(dataUrl, filenamePrefix = "avatar") {
     if (!isImageDataUrl(dataUrl)) return dataUrl;
 
+    console.log("[Upload] Starting image upload process");
+    console.log("[Upload] Data URL length:", dataUrl.length);
+    console.log("[Upload] Data URL starts with:", dataUrl.substring(0, 50));
+
     const token = getAuthToken();
+    console.log("[Upload] Token present?", !!token);
+
     if (!token) {
+      console.error("[Upload] No token found - user may need to re-login");
       throw new Error("Please log in again before uploading your profile image.");
     }
 
-    const compressedDataUrl = await compressImageDataUrl(dataUrl);
-    const uploadPayload = {
-      filename: `${filenamePrefix}-${Date.now()}.jpg`,
-      contentType: "image/jpeg",
-      base64Data: compressedDataUrl
-    };
-    const uploadBytes = getPayloadBytes(uploadPayload);
-    console.log(`[Tapfolio] Avatar upload payload size: ${(uploadBytes / 1024).toFixed(2)} KB`);
+    console.log("[Upload] Token first 20 chars:", token.substring(0, 20) + "...");
 
-    const uploadRes = await fetch("/api/profile/upload", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${token}`
-      },
-      body: JSON.stringify(uploadPayload)
-    });
+    try {
+      const compressedDataUrl = await compressImageDataUrl(dataUrl);
+      console.log("[Upload] Image compressed, new length:", compressedDataUrl.length);
 
-    const uploadData = await readApiResponse(uploadRes);
-    if (!uploadRes.ok) {
-      throw new Error(uploadData.error || `Image upload failed with status ${uploadRes.status}.`);
+      const uploadPayload = {
+        filename: `${filenamePrefix}-${Date.now()}.jpg`,
+        contentType: "image/jpeg",
+        base64Data: compressedDataUrl
+      };
+
+      const uploadBytes = getPayloadBytes(uploadPayload);
+      console.log(`[Upload] Avatar upload payload size: ${(uploadBytes / 1024).toFixed(2)} KB`);
+
+      console.log("[Upload] Sending request to /api/profile/upload");
+      const uploadRes = await fetch("/api/profile/upload", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`
+        },
+        body: JSON.stringify(uploadPayload)
+      });
+
+      console.log("[Upload] Response status:", uploadRes.status);
+      console.log("[Upload] Response headers:", Object.fromEntries(uploadRes.headers.entries()));
+
+      const uploadData = await readApiResponse(uploadRes);
+      console.log("[Upload] Response data:", uploadData);
+
+      if (!uploadRes.ok) {
+        console.error("[Upload] Upload failed with status:", uploadRes.status);
+        throw new Error(uploadData.error || `Image upload failed with status ${uploadRes.status}.`);
+      }
+
+      if (!uploadData.url || isImageDataUrl(uploadData.url)) {
+        console.error("[Upload] Invalid URL returned:", uploadData.url);
+        throw new Error("Image upload did not return a valid URL.");
+      }
+
+      console.log("[Upload] Upload successful, URL:", uploadData.url);
+      return uploadData.url;
+    } catch (err) {
+      console.error("[Upload] Upload error:", err);
+      throw err;
     }
-
-    if (!uploadData.url || isImageDataUrl(uploadData.url)) {
-      throw new Error("Image upload did not return a valid URL.");
-    }
-
-    return uploadData.url;
   }
 
   // Upload selected avatar immediately so profile_data only stores an image URL.
   const handleAvatarUpload = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
+
+    console.log("[Avatar] File selected:", {
+      name: file.name,
+      type: file.type,
+      size: file.size
+    });
 
     setAvatarUploadError("");
 
@@ -618,17 +666,28 @@ export default function App() {
     setIsAvatarUploading(true);
     try {
       const rawDataUrl = await readFileAsDataUrl(file);
-      setEditAvatar(rawDataUrl); // Temporary local preview only while the upload runs.
+      console.log("[Avatar] File read as DataURL, length:", rawDataUrl.length);
 
+      // Set temporary preview
+      setEditAvatar(rawDataUrl);
+
+      console.log("[Avatar] Starting upload for user:", currentUser?.username);
       const uploadedUrl = await uploadImageDataUrl(rawDataUrl, `${currentUser.username}-avatar`);
+
+      console.log("[Avatar] Upload completed, setting URL:", uploadedUrl);
       setEditAvatar(uploadedUrl);
-      console.log("[Tapfolio] Avatar uploaded successfully. URL:", uploadedUrl);
+      setAvatarUploadError(""); // Clear any previous errors
+
     } catch (err) {
-      console.error("Avatar upload error:", err);
+      console.error("[Avatar] Upload error details:", err);
       setAvatarUploadError(err.message || "Failed to upload profile image.");
+      // Revert to previous avatar on error
+      if (activeProfile?.avatar) {
+        setEditAvatar(activeProfile.avatar);
+      }
     } finally {
       setIsAvatarUploading(false);
-      e.target.value = "";
+      e.target.value = ""; // Clear file input
     }
   };
 
@@ -654,7 +713,7 @@ export default function App() {
         return;
       }
     }
-    
+
     const updatedProfile = {
       ...activeProfile,
       name: editName,
@@ -670,7 +729,7 @@ export default function App() {
       socials: activeProfile.socials.map(social => {
         let handle = social.handle;
         let url = social.url;
-        
+
         switch (social.platform) {
           case "Instagram":
             handle = editInstagram;
@@ -699,7 +758,7 @@ export default function App() {
             url = editBehance ? `https://behance.net/${editBehance}` : "#";
             break;
         }
-        
+
         return { ...social, handle, url };
       }),
       quote: {
@@ -724,7 +783,7 @@ export default function App() {
       alert(`Profile payload is ${payloadSizeKB}KB. Keep it below 100KB by storing images as URLs before saving.`);
       return;
     }
-    
+
     try {
       const token = getAuthToken();
       if (!token) {
@@ -734,21 +793,21 @@ export default function App() {
 
       const res = await fetch("/api/profile/update", {
         method: "PUT",
-        headers: { 
+        headers: {
           "Content-Type": "application/json",
           "Authorization": `Bearer ${token}`
         },
         body: JSON.stringify({ profileData: updatedProfile })
       });
-      
+
       const data = await readApiResponse(res);
-      
+
       if (!res.ok) {
         console.error("Save profile failed:", data.error);
         alert(`Failed to save changes: ${data.error || "Please try again."}`);
         return;
       }
-      
+
       // Update state live upon success, incorporating the calculated score from server
       const savedProfile = {
         ...updatedProfile,
@@ -779,7 +838,7 @@ export default function App() {
               <h1 className="greeting-name">{activeProfile.name}</h1>
               <div className="greeting-sub">{activeProfile.tagline}</div>
             </div>
-            
+
             <button className="diamond-badge" onClick={handleDiamondClick}>
               <Sparkles className="w-4 h-4" style={{ animation: "float 3s ease-in-out infinite" }} />
               <span>Score: {diamonds.toLocaleString()}</span>
@@ -791,9 +850,9 @@ export default function App() {
             <div className="avatar-wrapper">
               <div className="avatar-ring-outer">
                 <div className="avatar-ring-inner">
-                  <img 
-                    src={activeProfile.avatar} 
-                    alt={activeProfile.name} 
+                  <img
+                    src={activeProfile.avatar}
+                    alt={activeProfile.name}
                     className="avatar-image"
                   />
                 </div>
@@ -830,7 +889,7 @@ export default function App() {
       {/* Social links grid */}
       <div className="socials-grid" style={{ marginBottom: "24px" }}>
         {activeProfile.socials.map((social, idx) => (
-          <a 
+          <a
             key={idx}
             href={social.url}
             target="_blank"
@@ -875,7 +934,7 @@ export default function App() {
       <div className="tab-view-container">
         <h2 style={{ fontSize: "1.6rem", fontWeight: "800", marginBottom: "4px" }}>Tap Analytics</h2>
         <p style={{ color: "var(--text-muted)", fontSize: "0.85rem", marginBottom: "25px" }}>Realtime history of your connections.</p>
-        
+
         {isHistoryLoading ? (
           <div style={{ display: "flex", justifyContent: "center", padding: "40px 0" }}>
             <div style={{
@@ -944,7 +1003,7 @@ export default function App() {
     const hasAvatar = activeProfile.avatar && activeProfile.avatar !== "/profile_avatar.png" && activeProfile.avatar !== "";
     const hasBio = activeProfile.bio && activeProfile.bio.trim() !== "";
     const hasTags = activeProfile.tags && activeProfile.tags.some(t => t.text && t.text.trim() !== "");
-    
+
     // Connected socials count helper
     const getConnectedSocialsCount = () => {
       let count = 0;
@@ -966,7 +1025,7 @@ export default function App() {
       <div className="tab-view-container">
         <h2 style={{ fontSize: "1.6rem", fontWeight: "800", marginBottom: "4px" }}>Trending Portfolios</h2>
         <p style={{ color: "var(--text-muted)", fontSize: "0.85rem", marginBottom: "20px" }}>Creators with the most connections this week.</p>
-        
+
         {/* Requirements guidelines banner */}
         <div className="auth-card" style={{ marginTop: 0, marginBottom: "24px", padding: "16px", display: "flex", flexDirection: "column", gap: "8px", borderLeft: "4px solid var(--primary-color)", textAlign: "left" }}>
           <h4 style={{ fontSize: "0.88rem", fontWeight: "700", color: "var(--text-dark)", textTransform: "uppercase", letterSpacing: "0.5px" }}>Leaderboard Requirements</h4>
@@ -1033,22 +1092,22 @@ export default function App() {
                   transform: isUser ? "scale(1.02)" : "none"
                 }}>
                   <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-                    <span style={{ 
-                      fontSize: "1.1rem", 
-                      fontWeight: "800", 
+                    <span style={{
+                      fontSize: "1.1rem",
+                      fontWeight: "800",
                       color: rank === 1 ? "#fbbf24" : rank === 2 ? "#94a3b8" : rank === 3 ? "#b45309" : "var(--text-muted)",
                       width: "24px",
                       textAlign: "left"
                     }}>
                       #{rank}
                     </span>
-                    
-                    <img 
-                      src={leader.avatar || "/profile_avatar.png"} 
+
+                    <img
+                      src={leader.avatar || "/profile_avatar.png"}
                       alt={leader.name}
                       style={{ width: "42px", height: "42px", borderRadius: "50%", objectFit: "cover", border: "2px solid rgba(255, 255, 255, 0.1)", boxShadow: "0 2px 5px rgba(0,0,0,0.1)" }}
                     />
-                    
+
                     <div style={{ display: "flex", flexDirection: "column", gap: "1px", textAlign: "left" }}>
                       <span style={{ fontSize: "0.88rem", fontWeight: "700", color: "var(--text-dark)" }}>{leader.name} {isUser && "(You)"}</span>
                       <span style={{ fontSize: "0.72rem", color: "var(--text-muted)", fontWeight: "500" }}>{leader.tag || "Creator"}</span>
@@ -1110,9 +1169,9 @@ export default function App() {
           <form onSubmit={handleLogin}>
             <div className="form-group">
               <label className="form-label">Email Address</label>
-              <input 
-                type="email" 
-                className="form-input" 
+              <input
+                type="email"
+                className="form-input"
                 placeholder="you@domain.com"
                 value={loginEmail}
                 onChange={e => setLoginEmail(e.target.value)}
@@ -1121,23 +1180,23 @@ export default function App() {
             </div>
             <div className="form-group">
               <label className="form-label">Password</label>
-              <input 
-                type="password" 
-                className="form-input" 
+              <input
+                type="password"
+                className="form-input"
                 placeholder="••••••••"
                 value={loginPassword}
                 onChange={e => setLoginPassword(e.target.value)}
                 required
               />
             </div>
-            
+
             {/* Remember Me Checkbox */}
             <div className="form-group" style={{ flexDirection: "row", alignItems: "center", gap: "8px", marginTop: "4px", marginBottom: "8px" }}>
-              <input 
-                type="checkbox" 
-                id="rememberMe" 
-                checked={rememberMe} 
-                onChange={e => setRememberMe(e.target.checked)} 
+              <input
+                type="checkbox"
+                id="rememberMe"
+                checked={rememberMe}
+                onChange={e => setRememberMe(e.target.checked)}
                 style={{ width: "16px", height: "16px", accentColor: "var(--primary-color)", cursor: "pointer" }}
               />
               <label htmlFor="rememberMe" style={{ fontSize: "0.82rem", color: "var(--text-muted)", fontWeight: "500", cursor: "pointer", userSelect: "none" }}>
@@ -1154,9 +1213,9 @@ export default function App() {
           <form onSubmit={handleRegister}>
             <div className="form-group">
               <label className="form-label">Full Name</label>
-              <input 
-                type="text" 
-                className="form-input" 
+              <input
+                type="text"
+                className="form-input"
                 placeholder="Mohammed Nibras"
                 value={registerName}
                 onChange={e => setRegisterName(e.target.value)}
@@ -1165,9 +1224,9 @@ export default function App() {
             </div>
             <div className="form-group">
               <label className="form-label">Username</label>
-              <input 
-                type="text" 
-                className="form-input" 
+              <input
+                type="text"
+                className="form-input"
                 placeholder="nibras"
                 value={registerUsername}
                 onChange={e => setRegisterUsername(e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, ''))}
@@ -1176,9 +1235,9 @@ export default function App() {
             </div>
             <div className="form-group">
               <label className="form-label">Email Address</label>
-              <input 
-                type="email" 
-                className="form-input" 
+              <input
+                type="email"
+                className="form-input"
                 placeholder="you@domain.com"
                 value={registerEmail}
                 onChange={e => setRegisterEmail(e.target.value)}
@@ -1187,9 +1246,9 @@ export default function App() {
             </div>
             <div className="form-group">
               <label className="form-label">Password</label>
-              <input 
-                type="password" 
-                className="form-input" 
+              <input
+                type="password"
+                className="form-input"
                 placeholder="••••••••"
                 value={registerPassword}
                 onChange={e => setRegisterPassword(e.target.value)}
@@ -1288,7 +1347,7 @@ export default function App() {
             </div>
 
             {/* Eligibility Status Message */}
-            <div style={{ 
+            <div style={{
               backgroundColor: isEligible ? "rgba(34, 197, 94, 0.05)" : "rgba(239, 68, 68, 0.05)",
               border: isEligible ? "1px solid rgba(34, 197, 94, 0.2)" : "1px solid rgba(239, 68, 68, 0.2)",
               padding: "12px",
@@ -1302,8 +1361,8 @@ export default function App() {
                 <>✨ <strong>Listed on Leaderboard!</strong> Your portfolio is qualified and ranked with a total points boost of <strong>+{totalBoost.toLocaleString()} pts</strong>.</>
               ) : (
                 <>
-                  ⚠️ <strong>Not Listed on Leaderboard.</strong><br/>
-                  Requirements:<br/>
+                  ⚠️ <strong>Not Listed on Leaderboard.</strong><br />
+                  Requirements:<br />
                   {!editIsPremium && <div style={{ marginLeft: "8px" }}>• Upgrade to Premium Tier</div>}
                   {!meetsCompleteness && <div style={{ marginLeft: "8px" }}>• Complete checklist criteria (Avatar, Bio, Tags, 3+ Socials)</div>}
                 </>
@@ -1313,7 +1372,7 @@ export default function App() {
             {/* Toggle Controls */}
             <div>
               {editIsPremium ? (
-                <button 
+                <button
                   type="button"
                   onClick={() => setEditIsPremium(false)}
                   className="btn-danger-outline"
@@ -1322,7 +1381,7 @@ export default function App() {
                   Downgrade to Standard
                 </button>
               ) : (
-                <button 
+                <button
                   type="button"
                   onClick={() => setEditIsPremium(true)}
                   style={{
@@ -1401,11 +1460,11 @@ export default function App() {
             <div style={{ display: "flex", flexDirection: "column", gap: "24px" }}>
               <div className="auth-card" style={{ display: "flex", flexDirection: "column", gap: "14px", marginTop: 0 }}>
                 <h3 className="dashboard-section-title" style={{ marginTop: 0 }}>Basic Info</h3>
-                
+
                 <div className="form-group">
                   <label className="form-label">Display Name</label>
-                  <input 
-                    type="text" 
+                  <input
+                    type="text"
                     className="form-input"
                     value={editName}
                     onChange={e => setEditName(e.target.value)}
@@ -1419,18 +1478,18 @@ export default function App() {
                     <div className="avatar-wrapper" style={{ width: "70px", height: "70px" }}>
                       <div className="avatar-ring-outer" style={{ inset: "-4px" }}>
                         <div className="avatar-ring-inner">
-                          <img 
-                            src={editAvatar || "/profile_avatar.png"} 
-                            alt="Avatar Preview" 
+                          <img
+                            src={editAvatar || "/profile_avatar.png"}
+                            alt="Avatar Preview"
                             className="avatar-image"
                           />
                         </div>
                       </div>
                     </div>
                     <div style={{ display: "flex", flexDirection: "column", gap: "6px", flex: 1 }}>
-                      <input 
-                        type="file" 
-                        accept="image/*" 
+                      <input
+                        type="file"
+                        accept="image/*"
                         onChange={handleAvatarUpload}
                         disabled={isAvatarUploading}
                         className="form-input"
@@ -1450,8 +1509,8 @@ export default function App() {
 
                 <div className="form-group">
                   <label className="form-label">Tagline / Subtitle</label>
-                  <input 
-                    type="text" 
+                  <input
+                    type="text"
                     className="form-input"
                     value={editTagline}
                     onChange={e => setEditTagline(e.target.value)}
@@ -1460,7 +1519,7 @@ export default function App() {
 
                 <div className="form-group">
                   <label className="form-label">Bio Description</label>
-                  <textarea 
+                  <textarea
                     className="form-input"
                     rows="4"
                     style={{ resize: "none" }}
@@ -1471,8 +1530,8 @@ export default function App() {
 
                 <div className="form-group">
                   <label className="form-label">Location (City, Country)</label>
-                  <input 
-                    type="text" 
+                  <input
+                    type="text"
                     className="form-input"
                     value={editLocation}
                     onChange={e => setEditLocation(e.target.value)}
@@ -1481,8 +1540,8 @@ export default function App() {
 
                 <div className="form-group">
                   <label className="form-label">Role Tag 1</label>
-                  <input 
-                    type="text" 
+                  <input
+                    type="text"
                     className="form-input"
                     value={editTag1}
                     onChange={e => setEditTag1(e.target.value)}
@@ -1491,8 +1550,8 @@ export default function App() {
 
                 <div className="form-group">
                   <label className="form-label">Role Tag 2</label>
-                  <input 
-                    type="text" 
+                  <input
+                    type="text"
                     className="form-input"
                     value={editTag2}
                     onChange={e => setEditTag2(e.target.value)}
@@ -1505,7 +1564,7 @@ export default function App() {
 
                 <div className="form-group">
                   <label className="form-label">Quote Content</label>
-                  <textarea 
+                  <textarea
                     className="form-input"
                     rows="2"
                     style={{ resize: "none" }}
@@ -1523,8 +1582,8 @@ export default function App() {
 
                 <div className="form-group">
                   <label className="form-label">Instagram Username</label>
-                  <input 
-                    type="text" 
+                  <input
+                    type="text"
                     className="form-input"
                     placeholder="@username"
                     value={editInstagram}
@@ -1534,8 +1593,8 @@ export default function App() {
 
                 <div className="form-group">
                   <label className="form-label">LinkedIn Name / URL</label>
-                  <input 
-                    type="text" 
+                  <input
+                    type="text"
                     className="form-input"
                     placeholder="Username"
                     value={editLinkedin}
@@ -1545,8 +1604,8 @@ export default function App() {
 
                 <div className="form-group">
                   <label className="form-label">Telegram Handle</label>
-                  <input 
-                    type="text" 
+                  <input
+                    type="text"
                     className="form-input"
                     placeholder="@username"
                     value={editTelegram}
@@ -1556,8 +1615,8 @@ export default function App() {
 
                 <div className="form-group">
                   <label className="form-label">WhatsApp Text</label>
-                  <input 
-                    type="text" 
+                  <input
+                    type="text"
                     className="form-input"
                     placeholder="Chat with me"
                     value={editWhatsapp}
@@ -1567,8 +1626,8 @@ export default function App() {
 
                 <div className="form-group">
                   <label className="form-label">CV / Resume Text</label>
-                  <input 
-                    type="text" 
+                  <input
+                    type="text"
                     className="form-input"
                     placeholder="View & Download"
                     value={editCv}
@@ -1578,8 +1637,8 @@ export default function App() {
 
                 <div className="form-group">
                   <label className="form-label">Portfolio Website URL</label>
-                  <input 
-                    type="text" 
+                  <input
+                    type="text"
                     className="form-input"
                     placeholder="username.design"
                     value={editPortfolio}
@@ -1589,8 +1648,8 @@ export default function App() {
 
                 <div className="form-group">
                   <label className="form-label">Behance Username</label>
-                  <input 
-                    type="text" 
+                  <input
+                    type="text"
                     className="form-input"
                     placeholder="behance.net/username"
                     value={editBehance}
@@ -1630,25 +1689,25 @@ export default function App() {
         </button>
 
         <div className="navbar-menu">
-          <button 
+          <button
             className={`navbar-link ${activeTab === "home" ? "active" : ""}`}
             onClick={() => setActiveTab("home")}
           >
             Home
           </button>
-          <button 
+          <button
             className={`navbar-link ${activeTab === "history" ? "active" : ""}`}
             onClick={() => setActiveTab("history")}
           >
             History
           </button>
-          <button 
+          <button
             className={`navbar-link ${activeTab === "leaderboard" ? "active" : ""}`}
             onClick={() => setActiveTab("leaderboard")}
           >
             Leader Board
           </button>
-          <button 
+          <button
             className={`navbar-link ${activeTab === "profile" ? "active" : ""}`}
             onClick={handleProfileTabClick}
           >
@@ -1699,7 +1758,7 @@ export default function App() {
       {/* Main Responsive Grid Layout */}
       <div className="phone-frame">
         <div className="phone-notch"></div>
-        
+
         <div className="phone-content">
           {!currentUser ? (
             <div className="auth-container">
@@ -1720,15 +1779,15 @@ export default function App() {
         {/* Floating Bottom Nav - Only show when authenticated (Visible on Mobile) */}
         {currentUser && (
           <div className="bottom-nav">
-            <button 
+            <button
               className={`nav-item ${activeTab === "home" ? "active" : ""}`}
               onClick={() => setActiveTab("home")}
             >
               <Home className="nav-icon" />
               <span className="nav-label">Home</span>
             </button>
-            
-            <button 
+
+            <button
               className={`nav-item ${activeTab === "history" ? "active" : ""}`}
               onClick={() => setActiveTab("history")}
             >
@@ -1737,14 +1796,14 @@ export default function App() {
             </button>
 
             {/* Plus button triggers the Share dialog modal */}
-            <button 
+            <button
               className="nav-center-item"
               onClick={() => setShowShareModal(true)}
             >
               <Plus className="center-plus-icon" />
             </button>
 
-            <button 
+            <button
               className={`nav-item ${activeTab === "leaderboard" ? "active" : ""}`}
               onClick={() => setActiveTab("leaderboard")}
             >
@@ -1752,7 +1811,7 @@ export default function App() {
               <span className="nav-label">Leader Board</span>
             </button>
 
-            <button 
+            <button
               className={`nav-item ${activeTab === "profile" ? "active" : ""}`}
               onClick={handleProfileTabClick}
             >
@@ -1776,7 +1835,7 @@ export default function App() {
           zIndex: 1000,
           padding: "20px"
         }}
-        onClick={() => setShowShareModal(false)}
+          onClick={() => setShowShareModal(false)}
         >
           <div style={{
             background: "var(--card-bg)",
@@ -1792,9 +1851,9 @@ export default function App() {
             textAlign: "center",
             color: "var(--text-dark)"
           }}
-          onClick={e => e.stopPropagation()}
+            onClick={e => e.stopPropagation()}
           >
-            <button 
+            <button
               onClick={() => setShowShareModal(false)}
               style={{
                 position: "absolute",
@@ -1815,7 +1874,7 @@ export default function App() {
               <X className="w-4 h-4" />
             </button>
 
-            <div style={{ 
+            <div style={{
               background: "var(--primary-gradient)",
               width: "50px",
               height: "50px",
@@ -1881,7 +1940,7 @@ export default function App() {
               <span style={{ fontSize: "0.78rem", color: "var(--text-muted)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", flex: 1, textAlign: "left" }}>
                 {window.location.host || "pertap.com"}/nfc/{activeProfile.username || currentUser.username}
               </span>
-              <button 
+              <button
                 onClick={handleCopyLink}
                 style={{
                   background: "var(--primary-gradient)",
