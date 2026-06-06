@@ -52,7 +52,7 @@ export default async function handler(req, res) {
           diamonds: isNaN(parseInt(profile.diamonds)) ? 0 : parseInt(profile.diamonds),
           tag: profile.tags ? (profile.tags.filter(t => t.type === 'role')[0]?.text || '') : ''
         };
-      } catch (e) {
+      } catch {
         return null;
       }
     }).filter(Boolean);

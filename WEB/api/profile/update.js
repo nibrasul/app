@@ -1,6 +1,8 @@
 import { dbQuery } from '../../database/neon.js';
 import { withAuth } from '../../middleware/auth.js';
 
+const MAX_PROFILE_PAYLOAD_BYTES = 100 * 1024;
+
 function calculateScore(profile) {
   // Extract tap count
   const tapCount = isNaN(parseInt(profile.tapCount)) ? 0 : parseInt(profile.tapCount);
@@ -32,6 +34,29 @@ function calculateScore(profile) {
   return tapCount + completionBoost + premiumBoost;
 }
 
+function findBase64ImagePath(value, path = 'profileData') {
+  if (typeof value === 'string') {
+    return value.startsWith('data:image/') ? path : null;
+  }
+
+  if (Array.isArray(value)) {
+    for (let index = 0; index < value.length; index += 1) {
+      const result = findBase64ImagePath(value[index], `${path}[${index}]`);
+      if (result) return result;
+    }
+    return null;
+  }
+
+  if (value && typeof value === 'object') {
+    for (const [key, childValue] of Object.entries(value)) {
+      const result = findBase64ImagePath(childValue, `${path}.${key}`);
+      if (result) return result;
+    }
+  }
+
+  return null;
+}
+
 async function handler(req, res) {
   // CORS Preflight
   if (req.method === 'OPTIONS') {
@@ -52,13 +77,22 @@ async function handler(req, res) {
     return res.status(400).json({ error: 'Profile data is required for updates.' });
   }
 
-  if (profileData.avatar && profileData.avatar.startsWith('data:')) {
-    return res.status(400).json({ error: 'Base64 images are not allowed. Please upload images first.' });
+  const base64ImagePath = findBase64ImagePath(profileData);
+  if (base64ImagePath) {
+    return res.status(400).json({
+      error: `Base64 images are not allowed in ${base64ImagePath}. Please upload the image first and save only the returned URL.`
+    });
+  }
+
+  const incomingPayloadBytes = Buffer.byteLength(JSON.stringify({ profileData }), 'utf8');
+  if (incomingPayloadBytes > MAX_PROFILE_PAYLOAD_BYTES) {
+    return res.status(413).json({
+      error: `Profile payload is ${(incomingPayloadBytes / 1024).toFixed(2)}KB. Keep profileData below 100KB by storing images as URLs.`
+    });
   }
 
   try {
     const userId = req.user.id;
-    const username = req.user.username;
 
     // 1. Fetch current profile from database to get current tapCount
     const currentProfileRes = await dbQuery('SELECT profile_data FROM profiles WHERE user_id = $1', [userId]);
@@ -78,6 +112,13 @@ async function handler(req, res) {
     // Recalculate diamonds score
     const totalScore = calculateScore(profileData);
     profileData.diamonds = totalScore.toString();
+
+    const finalPayloadBytes = Buffer.byteLength(JSON.stringify({ profileData }), 'utf8');
+    if (finalPayloadBytes > MAX_PROFILE_PAYLOAD_BYTES) {
+      return res.status(413).json({
+        error: `Profile payload is ${(finalPayloadBytes / 1024).toFixed(2)}KB after scoring. Keep profileData below 100KB.`
+      });
+    }
 
     // 2. Perform Profile Update
     await dbQuery(

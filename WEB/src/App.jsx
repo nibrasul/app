@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { profileData } from "./profileData.js";
 import { 
   ChevronRight, 
@@ -14,9 +14,7 @@ import {
   Check,
   Copy,
   X,
-  Share2,
-  Mail,
-  SendHorizontal
+  Share2
 } from "lucide-react";
 
 /* Custom High-Fidelity SVG Brand Icons to match exact logos */
@@ -116,7 +114,7 @@ const formatTimeAgo = (dateString) => {
     if (days === 1) return "yesterday";
     if (days < 7) return `${days}d ago`;
     return date.toLocaleDateString(undefined, { month: "short", day: "numeric" });
-  } catch (e) {
+  } catch {
     return dateString;
   }
 };
@@ -133,11 +131,6 @@ export default function App() {
   const [isHistoryLoading, setIsHistoryLoading] = useState(false);
   const [isLeaderboardLoading, setIsLeaderboardLoading] = useState(false);
   
-  // Interactive forms state
-  const [contactSent, setContactSent] = useState(false);
-  const [contactName, setContactName] = useState("");
-  const [contactMsg, setContactMsg] = useState("");
-
   // Session & Auth Database State
   const [currentUser, setCurrentUser] = useState(() => {
     const localSession = localStorage.getItem("pertap_session");
@@ -185,6 +178,8 @@ export default function App() {
   const [editQuoteText, setEditQuoteText] = useState("");
   const [editIsPremium, setEditIsPremium] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
+  const [isAvatarUploading, setIsAvatarUploading] = useState(false);
+  const [avatarUploadError, setAvatarUploadError] = useState("");
 
   // Async Database Profile Resolver
   const [activeProfile, setActiveProfile] = useState(profileData);
@@ -234,10 +229,26 @@ export default function App() {
         });
         if (res.ok) {
           const data = await res.json();
-          setActiveProfile(data);
-          setDiamonds(parseInt(data.diamonds || 0));
+          let resolvedProfile = data;
+
+          if (currentUser && isImageDataUrl(data.avatar)) {
+            setIsAvatarUploading(true);
+            try {
+              const migratedAvatarUrl = await uploadImageDataUrl(data.avatar, `${currentUser.username}-avatar-migrated`);
+              resolvedProfile = { ...data, avatar: migratedAvatarUrl };
+              console.log("[Tapfolio] Migrated legacy Base64 avatar to uploaded URL during profile load.");
+            } catch (uploadErr) {
+              console.error("Failed to migrate legacy Base64 avatar during profile load:", uploadErr);
+              setAvatarUploadError("Existing profile image is Base64. Choose the image again if saving still fails.");
+            } finally {
+              setIsAvatarUploading(false);
+            }
+          }
+
+          setActiveProfile(resolvedProfile);
+          setDiamonds(parseInt(resolvedProfile.diamonds || 0));
           if (currentUser) {
-            syncEditorFields(data);
+            syncEditorFields(resolvedProfile);
           }
         }
       } catch (err) {
@@ -248,6 +259,7 @@ export default function App() {
     };
 
     fetchProfile();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentUser]);
 
   // Real database-backed history and leaderboard fetching helpers
@@ -309,12 +321,17 @@ export default function App() {
 
   // Sync tab loading effects
   useEffect(() => {
-    if (activeTab === "history") {
-      fetchHistoryEvents(activeProfile.username || (currentUser ? currentUser.username : "default"));
-    } else if (activeTab === "leaderboard") {
-      fetchLeaderboard();
-    }
-  }, [activeTab, currentUser]);
+    const requestedUsername = activeProfile.username || (currentUser ? currentUser.username : "default");
+    const timer = setTimeout(() => {
+      if (activeTab === "history") {
+        fetchHistoryEvents(requestedUsername);
+      } else if (activeTab === "leaderboard") {
+        fetchLeaderboard();
+      }
+    }, 0);
+
+    return () => clearTimeout(timer);
+  }, [activeTab, currentUser, activeProfile.username]);
 
   // Social link connection click tracker
   const handleSocialClick = async (social) => {
@@ -361,16 +378,6 @@ export default function App() {
     navigator.clipboard.writeText(copyUrl);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
-  };
-
-  const handleContactSubmit = (e) => {
-    e.preventDefault();
-    setContactSent(true);
-    setTimeout(() => {
-      setContactSent(false);
-      setContactName("");
-      setContactMsg("");
-    }, 4000);
   };
 
   // Login action handler (hits Vercel Serverless Endpoint)
@@ -468,131 +475,182 @@ export default function App() {
     setCurrentUser(null);
   };
 
-  // FileReader Avatar Upload Handler with Client-side Canvas Compression
-  const handleAvatarUpload = (e) => {
+  const getAuthToken = () => {
+    const session = localStorage.getItem("pertap_session") || sessionStorage.getItem("pertap_session");
+    if (!session) return null;
+
+    try {
+      return JSON.parse(session).token || null;
+    } catch (err) {
+      console.error("Failed to parse stored session:", err);
+      return null;
+    }
+  };
+
+  const readApiResponse = async (response) => {
+    const text = await response.text();
+    if (!text) return {};
+
+    try {
+      return JSON.parse(text);
+    } catch {
+      return { error: text };
+    }
+  };
+
+  function isImageDataUrl(value) {
+    return typeof value === "string" && value.startsWith("data:image/");
+  }
+
+  const findBase64ImagePath = (value, path = "profileData") => {
+    if (typeof value === "string") {
+      return isImageDataUrl(value) ? path : null;
+    }
+
+    if (Array.isArray(value)) {
+      for (let index = 0; index < value.length; index += 1) {
+        const result = findBase64ImagePath(value[index], `${path}[${index}]`);
+        if (result) return result;
+      }
+      return null;
+    }
+
+    if (value && typeof value === "object") {
+      for (const [key, childValue] of Object.entries(value)) {
+        const result = findBase64ImagePath(childValue, `${path}.${key}`);
+        if (result) return result;
+      }
+    }
+
+    return null;
+  };
+
+  const getPayloadBytes = (value) => new TextEncoder().encode(JSON.stringify(value)).length;
+
+  const readFileAsDataUrl = (file) => new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = (event) => resolve(event.target.result);
+    reader.onerror = () => reject(new Error("Could not read the selected image."));
+    reader.readAsDataURL(file);
+  });
+
+  const compressImageDataUrl = (dataUrl, maxSize = 320) => new Promise((resolve, reject) => {
+    if (!isImageDataUrl(dataUrl)) {
+      resolve(dataUrl);
+      return;
+    }
+
+    const img = new Image();
+    img.onload = () => {
+      const canvas = document.createElement("canvas");
+      let width = img.width;
+      let height = img.height;
+
+      if (width > height && width > maxSize) {
+        height *= maxSize / width;
+        width = maxSize;
+      } else if (height > maxSize) {
+        width *= maxSize / height;
+        height = maxSize;
+      }
+
+      canvas.width = Math.max(1, Math.round(width));
+      canvas.height = Math.max(1, Math.round(height));
+
+      const ctx = canvas.getContext("2d");
+      ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+      resolve(canvas.toDataURL("image/jpeg", 0.72));
+    };
+    img.onerror = () => reject(new Error("Could not process the selected image."));
+    img.src = dataUrl;
+  });
+
+  async function uploadImageDataUrl(dataUrl, filenamePrefix = "avatar") {
+    if (!isImageDataUrl(dataUrl)) return dataUrl;
+
+    const token = getAuthToken();
+    if (!token) {
+      throw new Error("Please log in again before uploading your profile image.");
+    }
+
+    const compressedDataUrl = await compressImageDataUrl(dataUrl);
+    const uploadPayload = {
+      filename: `${filenamePrefix}-${Date.now()}.jpg`,
+      contentType: "image/jpeg",
+      base64Data: compressedDataUrl
+    };
+    const uploadBytes = getPayloadBytes(uploadPayload);
+    console.log(`[Tapfolio] Avatar upload payload size: ${(uploadBytes / 1024).toFixed(2)} KB`);
+
+    const uploadRes = await fetch("/api/profile/upload", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${token}`
+      },
+      body: JSON.stringify(uploadPayload)
+    });
+
+    const uploadData = await readApiResponse(uploadRes);
+    if (!uploadRes.ok) {
+      throw new Error(uploadData.error || `Image upload failed with status ${uploadRes.status}.`);
+    }
+
+    if (!uploadData.url || isImageDataUrl(uploadData.url)) {
+      throw new Error("Image upload did not return a valid URL.");
+    }
+
+    return uploadData.url;
+  }
+
+  // Upload selected avatar immediately so profile_data only stores an image URL.
+  const handleAvatarUpload = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
 
-    const reader = new FileReader();
-    reader.onload = (event) => {
-      const img = new Image();
-      img.onload = () => {
-        const canvas = document.createElement('canvas');
-        const MAX_SIZE = 250; // Max size for profile avatar
-        let width = img.width;
-        let height = img.height;
+    setAvatarUploadError("");
 
-        // Calculate proportional dimensions
-        if (width > height) {
-          if (width > MAX_SIZE) {
-            height *= MAX_SIZE / width;
-            width = MAX_SIZE;
-          }
-        } else {
-          if (height > MAX_SIZE) {
-            width *= MAX_SIZE / height;
-            height = MAX_SIZE;
-          }
-        }
+    if (!file.type.startsWith("image/")) {
+      setAvatarUploadError("Please choose an image file.");
+      return;
+    }
 
-        canvas.width = width;
-        canvas.height = height;
-        const ctx = canvas.getContext('2d');
-        
-        // Draw image resized onto canvas
-        ctx.drawImage(img, 0, 0, width, height);
+    setIsAvatarUploading(true);
+    try {
+      const rawDataUrl = await readFileAsDataUrl(file);
+      setEditAvatar(rawDataUrl); // Temporary local preview only while the upload runs.
 
-        // Export as compressed JPEG (under 50KB)
-        const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.75);
-        setEditAvatar(compressedDataUrl);
-      };
-      img.src = event.target.result;
-    };
-    reader.readAsDataURL(file);
-  };
-
-  const compressBase64Image = (base64Str, maxSize = 250) => {
-    return new Promise((resolve) => {
-      if (!base64Str || !base64Str.startsWith('data:') || !base64Str.includes('base64,') || base64Str.length < 100000) {
-        resolve(base64Str);
-        return;
-      }
-      
-      const img = new Image();
-      img.onload = () => {
-        const canvas = document.createElement('canvas');
-        let width = img.width;
-        let height = img.height;
-
-        if (width > height) {
-          if (width > maxSize) {
-            height *= maxSize / width;
-            width = maxSize;
-          }
-        } else {
-          if (height > maxSize) {
-            width *= maxSize / height;
-            height = maxSize;
-          }
-        }
-
-        canvas.width = width;
-        canvas.height = height;
-        const ctx = canvas.getContext('2d');
-        ctx.drawImage(img, 0, 0, width, height);
-        resolve(canvas.toDataURL('image/jpeg', 0.75));
-      };
-      img.onerror = () => {
-        resolve(base64Str);
-      };
-      img.src = base64Str;
-    });
+      const uploadedUrl = await uploadImageDataUrl(rawDataUrl, `${currentUser.username}-avatar`);
+      setEditAvatar(uploadedUrl);
+      console.log("[Tapfolio] Avatar uploaded successfully. URL:", uploadedUrl);
+    } catch (err) {
+      console.error("Avatar upload error:", err);
+      setAvatarUploadError(err.message || "Failed to upload profile image.");
+    } finally {
+      setIsAvatarUploading(false);
+      e.target.value = "";
+    }
   };
 
   // Profile Editor Save handler (hits Vercel Serverless Endpoint)
   const handleSaveProfile = async (e) => {
     e.preventDefault();
     if (!currentUser) return;
-    
-    // 1. Auto-compress avatar on the fly if it is a large legacy base64 image
-    const compressedAvatar = await compressBase64Image(editAvatar);
-    let finalAvatarUrl = compressedAvatar;
 
-    // 2. If avatar is base64 string, upload it to obtain CDN/local static URL
-    if (compressedAvatar && compressedAvatar.startsWith('data:')) {
+    if (isAvatarUploading) {
+      alert("Please wait for the profile image upload to finish before saving.");
+      return;
+    }
+
+    let finalAvatarUrl = editAvatar;
+    if (isImageDataUrl(finalAvatarUrl)) {
       try {
-        console.log("[Tapfolio] Uploading avatar image... base64 size:", compressedAvatar.length, "chars");
-        const mimeMatch = compressedAvatar.match(/^data:([^;]+);/);
-        const contentType = mimeMatch ? mimeMatch[1] : 'image/jpeg';
-        const fileExt = contentType.split('/')[1] || 'jpg';
-        const filename = `${currentUser.username}-avatar-${Date.now()}.${fileExt}`;
-
-        const uploadRes = await fetch("/api/profile/upload", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify({
-            filename,
-            contentType,
-            base64Data: compressedAvatar
-          })
-        });
-
-        if (uploadRes.ok) {
-          const uploadData = await uploadRes.json();
-          finalAvatarUrl = uploadData.url;
-          setEditAvatar(finalAvatarUrl); // Update local state
-          console.log("[Tapfolio] Avatar uploaded successfully. URL:", finalAvatarUrl);
-        } else {
-          const uploadErr = await uploadRes.text();
-          console.error("Failed to upload avatar:", uploadErr);
-          alert("Failed to upload profile image. Changes not saved.");
-          return;
-        }
+        console.log("[Tapfolio] Legacy Base64 avatar detected during save. Uploading before profile update.");
+        finalAvatarUrl = await uploadImageDataUrl(finalAvatarUrl, `${currentUser.username}-avatar`);
+        setEditAvatar(finalAvatarUrl);
       } catch (err) {
-        console.error("Avatar upload network error:", err);
-        alert("Network error occurred during image upload.");
+        console.error("Avatar upload before save failed:", err);
+        alert(err.message || "Failed to upload profile image. Changes not saved.");
         return;
       }
     }
@@ -650,14 +708,30 @@ export default function App() {
       }
     };
 
-    // 3. Log payload size before saving
+    const base64ImagePath = findBase64ImagePath(updatedProfile);
+    if (base64ImagePath) {
+      alert(`Profile image at ${base64ImagePath} is still Base64. Upload the image first, then save again.`);
+      return;
+    }
+
+    // 3. Log payload size before saving and block oversized profile JSON.
     const payloadStr = JSON.stringify({ profileData: updatedProfile });
-    const payloadSizeKB = (payloadStr.length / 1024).toFixed(2);
-    console.log(`[Tapfolio] Profile save payload size: ${payloadSizeKB} KB (string length: ${payloadStr.length})`);
+    const payloadBytes = new TextEncoder().encode(payloadStr).length;
+    const payloadSizeKB = (payloadBytes / 1024).toFixed(2);
+    console.log(`[Tapfolio] Profile save payload size: ${payloadSizeKB} KB (${payloadBytes} bytes)`);
+
+    if (payloadBytes > 100 * 1024) {
+      alert(`Profile payload is ${payloadSizeKB}KB. Keep it below 100KB by storing images as URLs before saving.`);
+      return;
+    }
     
     try {
-      const session = localStorage.getItem("pertap_session") || sessionStorage.getItem("pertap_session");
-      const token = session ? JSON.parse(session).token : null;
+      const token = getAuthToken();
+      if (!token) {
+        alert("Your session has expired. Please log in again before saving.");
+        return;
+      }
+
       const res = await fetch("/api/profile/update", {
         method: "PUT",
         headers: { 
@@ -667,16 +741,7 @@ export default function App() {
         body: JSON.stringify({ profileData: updatedProfile })
       });
       
-      let data = {};
-      const contentType = res.headers.get("content-type");
-      if (contentType && contentType.includes("application/json")) {
-        data = await res.json();
-      } else {
-        const text = await res.text();
-        console.error("Non-JSON response from server:", text);
-        alert(`Server returned error (${res.status}): ${text.substring(0, 150)}`);
-        return;
-      }
+      const data = await readApiResponse(res);
       
       if (!res.ok) {
         console.error("Save profile failed:", data.error);
@@ -1367,12 +1432,18 @@ export default function App() {
                         type="file" 
                         accept="image/*" 
                         onChange={handleAvatarUpload}
+                        disabled={isAvatarUploading}
                         className="form-input"
                         style={{ fontSize: "0.8rem", padding: "8px 10px" }}
                       />
                       <span style={{ fontSize: "0.72rem", color: "var(--text-muted)" }}>
-                        Supports JPG, PNG, GIF. Max size 5MB recommended.
+                        {isAvatarUploading ? "Uploading image and replacing Base64 with a URL..." : "Supports JPG, PNG, GIF. The saved profile stores only the uploaded URL."}
                       </span>
+                      {avatarUploadError && (
+                        <span style={{ fontSize: "0.72rem", color: "#ef4444", fontWeight: "600" }}>
+                          {avatarUploadError}
+                        </span>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -1528,7 +1599,20 @@ export default function App() {
                 </div>
               </div>
 
-              <button type="submit" className="form-submit-btn" style={{ height: "54px", fontSize: "1rem", marginBottom: "20px" }}>Save Profile Changes</button>
+              <button
+                type="submit"
+                className="form-submit-btn"
+                disabled={isAvatarUploading}
+                style={{
+                  height: "54px",
+                  fontSize: "1rem",
+                  marginBottom: "20px",
+                  opacity: isAvatarUploading ? 0.65 : 1,
+                  cursor: isAvatarUploading ? "not-allowed" : "pointer"
+                }}
+              >
+                {isAvatarUploading ? "Uploading Image..." : "Save Profile Changes"}
+              </button>
             </div>
           </div>
         </form>

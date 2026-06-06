@@ -9,6 +9,10 @@ dotenv.config();
 export function withAuth(handler) {
   return async (req, res) => {
     try {
+      if (req.method === 'OPTIONS') {
+        return await handler(req, res);
+      }
+
       const authHeader = req.headers['authorization'] || req.headers['Authorization'];
       const token = authHeader && authHeader.split(' ')[1]; // Bearer <token>
 
