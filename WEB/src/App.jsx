@@ -549,10 +549,20 @@ export default function App() {
         body: JSON.stringify({ profileData: updatedProfile })
       });
       
-      const data = await res.json();
+      let data = {};
+      const contentType = res.headers.get("content-type");
+      if (contentType && contentType.includes("application/json")) {
+        data = await res.json();
+      } else {
+        const text = await res.text();
+        console.error("Non-JSON response from server:", text);
+        alert(`Server returned error (${res.status}): ${text.substring(0, 150)}`);
+        return;
+      }
+      
       if (!res.ok) {
         console.error("Save profile failed:", data.error);
-        alert("Failed to save changes. Please try again.");
+        alert(`Failed to save changes: ${data.error || "Please try again."}`);
         return;
       }
       
@@ -567,7 +577,7 @@ export default function App() {
       setTimeout(() => setSaveSuccess(false), 3000);
     } catch (err) {
       console.error("Save profile request error:", err);
-      alert("Network error occurred while saving.");
+      alert(`Network error occurred while saving: ${err.message}`);
     }
   };
 
