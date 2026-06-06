@@ -1,0 +1,308 @@
+.wrapper {
+  min-height: 100vh;
+  background: radial-gradient(circle at top left, rgba(168, 85, 247, 0.05) 0%, var(--bg-primary) 50%);
+}
+
+.main {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 3rem 2rem;
+}
+
+.loadingWrapper {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  gap: 1rem;
+  font-size: 1.1rem;
+  color: var(--text-secondary);
+}
+
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid rgba(255, 255, 255, 0.1);
+  border-top-color: var(--accent-glow);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.headerArea {
+  text-align: center;
+  margin-bottom: 3rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.title {
+  font-size: 2.25rem;
+  font-weight: 950;
+  letter-spacing: -0.75px;
+}
+
+.subtitle {
+  color: var(--text-secondary);
+  font-size: 1.05rem;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.errorAlert {
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.2);
+  color: #fca5a5;
+  padding: 1rem;
+  border-radius: var(--radius-sm);
+  margin-bottom: 2rem;
+}
+
+.emptyCard {
+  padding: 3rem;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.25rem;
+}
+
+.emptyIcon {
+  font-size: 3rem;
+}
+
+.emptyCard h3 {
+  font-size: 1.3rem;
+  font-weight: 700;
+}
+
+.emptyCard p {
+  font-size: 0.95rem;
+  color: var(--text-secondary);
+  max-width: 400px;
+}
+
+.dashboardCta {
+  margin-top: 0.5rem;
+  background: var(--gradient-premium);
+  font-weight: 700;
+  padding: 0.8rem 1.6rem;
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow-glow);
+  transition: opacity var(--transition-fast);
+}
+
+.dashboardCta:hover {
+  opacity: 0.9;
+}
+
+.rankList {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.rankCard {
+  display: flex;
+  align-items: center;
+  padding: 1.5rem;
+  gap: 1.5rem;
+}
+
+.rankNumCol {
+  width: 45px;
+  display: flex;
+  justify-content: center;
+}
+
+.rankBadge {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  font-weight: 800;
+  font-size: 0.95rem;
+}
+
+.rank1 {
+  background: #fbbf24;
+  color: #78350f;
+  box-shadow: 0 0 12px rgba(251, 191, 36, 0.4);
+}
+
+.rank2 {
+  background: #cbd5e1;
+  color: #1e293b;
+  box-shadow: 0 0 10px rgba(203, 213, 225, 0.3);
+}
+
+.rank3 {
+  background: #b45309;
+  color: white;
+  box-shadow: 0 0 8px rgba(180, 83, 9, 0.3);
+}
+
+.rankOther {
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--text-secondary);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.profileCol {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  min-width: 0;
+}
+
+.avatar {
+  width: 54px;
+  height: 54px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid rgba(255, 255, 255, 0.05);
+}
+
+.profileDetails {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  min-width: 0;
+}
+
+.nameRow {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.name {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.premiumBadge {
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: #fbbf24;
+  background: rgba(251, 191, 36, 0.1);
+  border: 1px solid rgba(251, 191, 36, 0.3);
+  padding: 0.15rem 0.4rem;
+  border-radius: var(--radius-full);
+}
+
+.tagline {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.tags {
+  display: flex;
+  gap: 0.4rem;
+  flex-wrap: wrap;
+  margin-top: 0.25rem;
+}
+
+.tag {
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 0.2rem 0.5rem;
+  border-radius: var(--radius-full);
+}
+
+.tagRole {
+  background: rgba(99, 102, 241, 0.1);
+  color: #a5b4fc;
+  border: 1px solid rgba(99, 102, 241, 0.2);
+}
+
+.tagLoc {
+  background: rgba(168, 85, 247, 0.1);
+  color: #d8b4fe;
+  border: 1px solid rgba(168, 85, 247, 0.2);
+}
+
+.statsCol {
+  display: flex;
+  gap: 1.5rem;
+}
+
+.statBox {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.statVal {
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: var(--text-primary);
+}
+
+.statLabel {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  font-weight: 600;
+}
+
+.actionCol {
+  margin-left: 0.5rem;
+}
+
+.viewBtn {
+  font-size: 0.85rem;
+  font-weight: 700;
+  padding: 0.5rem 1rem;
+  border-radius: var(--radius-sm);
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  transition: all var(--transition-fast);
+  white-space: nowrap;
+}
+
+.viewBtn:hover {
+  background: var(--accent-glow);
+  border-color: var(--accent-glow);
+  box-shadow: 0 0 10px rgba(99, 102, 241, 0.25);
+}
+
+@media (max-width: 768px) {
+  .rankCard {
+    flex-wrap: wrap;
+    padding: 1.25rem;
+  }
+  .profileCol {
+    width: calc(100% - 60px);
+    flex: none;
+  }
+  .statsCol {
+    margin-left: 60px;
+    width: 100%;
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+    padding-top: 0.75rem;
+  }
+  .actionCol {
+    margin-left: 60px;
+    width: 100%;
+    margin-top: 0.5rem;
+  }
+  .viewBtn {
+    width: 100%;
+    text-align: center;
+  }
+}

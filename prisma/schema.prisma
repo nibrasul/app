@@ -1,0 +1,63 @@
+datasource db {
+  provider = "postgresql"
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id           Int       @id @default(autoincrement())
+  name         String
+  email        String    @unique
+  passwordHash String
+  profile      Profile?
+  createdAt    DateTime  @default(now())
+}
+
+model Profile {
+  id             Int            @id @default(autoincrement())
+  user           User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId         Int            @unique
+  name           String
+  tagline        String?        @default("Let's connect!")
+  avatar         String         @default("/profile_avatar.png")
+  isOnline       Boolean        @default(true)
+  bio            String?        @default("I design meaningful experiences.")
+  diamonds       String         @default("0")
+  isPremium      Boolean        @default(false)
+  tapCount       Int            @default(0)
+  tags           Tag[]
+  socials        SocialLink[]
+  historyEvents  HistoryEvent[]
+}
+
+model Tag {
+  id        Int     @id @default(autoincrement())
+  profile   Profile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  profileId Int
+  text      String
+  type      String  // "role" | "location"
+}
+
+model SocialLink {
+  id        Int     @id @default(autoincrement())
+  profile   Profile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  profileId Int
+  platform  String
+  handle    String
+  url       String
+  icon      String
+  color     String
+}
+
+model HistoryEvent {
+  id        Int      @id @default(autoincrement())
+  profile   Profile  @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  profileId Int
+  action    String
+  details   String
+  icon      String?
+  color     String?
+  createdAt DateTime @default(now())
+}

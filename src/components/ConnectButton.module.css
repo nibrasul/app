@@ -1,0 +1,41 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  width: 100%;
+}
+
+.connectBtn {
+  width: 100%;
+  padding: 0.9rem;
+  font-size: 1.05rem;
+  font-weight: 750;
+  border-radius: var(--radius-md);
+  background: var(--gradient-premium);
+  color: white;
+  box-shadow: var(--shadow-glow);
+  transition: all var(--transition-normal);
+  text-align: center;
+}
+
+.connectBtn:hover:not(:disabled) {
+  opacity: 0.95;
+  transform: translateY(-2px);
+}
+
+.connectBtn:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.connected {
+  background: var(--accent-success);
+  box-shadow: 0 0 15px rgba(16, 185, 129, 0.3);
+  cursor: default;
+}
+
+.tapStats {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text-muted);
+}
