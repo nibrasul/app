@@ -7,12 +7,14 @@ generator client {
 }
 
 model User {
-  id           Int       @id @default(autoincrement())
-  name         String
-  email        String    @unique
-  passwordHash String
-  profile      Profile?
-  createdAt    DateTime  @default(now())
+  id                  Int          @id @default(autoincrement())
+  name                String
+  email               String       @unique
+  passwordHash        String
+  profile             Profile?
+  createdAt           DateTime     @default(now())
+  sentConnections     Connection[] @relation("Requester")
+  receivedConnections Connection[] @relation("Receiver")
 }
 
 model Profile {
@@ -24,6 +26,7 @@ model Profile {
   avatar         String         @default("/profile_avatar.png")
   isOnline       Boolean        @default(true)
   bio            String?        @default("I design meaningful experiences.")
+  phone          String?
   diamonds       String         @default("0")
   isPremium      Boolean        @default(false)
   tapCount       Int            @default(0)
@@ -75,4 +78,35 @@ model AppVersion {
   createdAt   DateTime @default(now()) @map("created_at")
 
   @@map("app_versions")
+}
+
+model Connection {
+  id          Int      @id @default(autoincrement())
+  requesterId Int
+  receiverId  Int
+  status      String   @default("pending") // pending | accepted | rejected | blocked
+  via         String   @default("link")    // link | nfc | qr
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  requester  User                  @relation("Requester", fields: [requesterId], references: [id], onDelete: Cascade)
+  receiver   User                  @relation("Receiver",  fields: [receiverId],  references: [id], onDelete: Cascade)
+  permission ConnectionPermission?
+
+  @@unique([requesterId, receiverId])
+  @@map("connections")
+}
+
+model ConnectionPermission {
+  id            Int        @id @default(autoincrement())
+  connectionId  Int        @unique
+  shareName     Boolean    @default(true)
+  shareEmail    Boolean    @default(true)
+  sharePhone    Boolean    @default(false)
+  shareWhatsapp Boolean    @default(true)
+  shareLocation Boolean    @default(false)
+
+  connection Connection @relation(fields: [connectionId], references: [id], onDelete: Cascade)
+
+  @@map("connection_permissions")
 }

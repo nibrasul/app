@@ -4,6 +4,7 @@ import 'dashboard_screen.dart';
 import 'leaderboard_screen.dart';
 import 'history_screen.dart';
 import 'profile_view_screen.dart';
+import 'connections_screen.dart';
 import '../services/api_service.dart';
 
 class MainNavigationShell extends StatefulWidget {
@@ -18,6 +19,7 @@ class MainNavigationShell extends StatefulWidget {
 class _MainNavigationShellState extends State<MainNavigationShell> {
   int _currentIndex = 0;
   final ApiService _apiService = ApiService();
+  int _pendingCount = 0;
 
   late List<Widget> _screens;
 
@@ -28,8 +30,17 @@ class _MainNavigationShellState extends State<MainNavigationShell> {
       const DashboardScreen(),
       const LeaderboardScreen(),
       const HistoryScreen(),
+      const ConnectionsScreen(),
       const ProfileViewScreen(),
     ];
+    _fetchPendingCount();
+  }
+
+  Future<void> _fetchPendingCount() async {
+    final pending = await _apiService.getPendingRequests();
+    if (mounted) {
+      setState(() => _pendingCount = pending.length);
+    }
   }
 
   @override
@@ -76,9 +87,9 @@ class _MainNavigationShellState extends State<MainNavigationShell> {
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _currentIndex,
         onTap: (index) {
-          setState(() {
-            _currentIndex = index;
-          });
+          setState(() => _currentIndex = index);
+          // Refresh pending count when switching to connections tab
+          if (index == 3) _fetchPendingCount();
         },
         backgroundColor: const Color(0xFF141420),
         selectedItemColor: Colors.indigoAccent,
@@ -87,23 +98,38 @@ class _MainNavigationShellState extends State<MainNavigationShell> {
         type: BottomNavigationBarType.fixed,
         selectedLabelStyle: GoogleFonts.outfit(fontSize: 12, fontWeight: FontWeight.w500),
         unselectedLabelStyle: GoogleFonts.outfit(fontSize: 12),
-        items: const [
-          BottomNavigationBarItem(
+        items: [
+          const BottomNavigationBarItem(
             icon: Icon(Icons.dashboard_outlined),
             activeIcon: Icon(Icons.dashboard),
             label: 'Dashboard',
           ),
-          BottomNavigationBarItem(
+          const BottomNavigationBarItem(
             icon: Icon(Icons.emoji_events_outlined),
             activeIcon: Icon(Icons.emoji_events),
             label: 'Leaderboard',
           ),
-          BottomNavigationBarItem(
+          const BottomNavigationBarItem(
             icon: Icon(Icons.history_outlined),
             activeIcon: Icon(Icons.history),
             label: 'Logs',
           ),
           BottomNavigationBarItem(
+            icon: _pendingCount > 0
+                ? Badge.count(
+                    count: _pendingCount,
+                    child: const Icon(Icons.people_outline),
+                  )
+                : const Icon(Icons.people_outline),
+            activeIcon: _pendingCount > 0
+                ? Badge.count(
+                    count: _pendingCount,
+                    child: const Icon(Icons.people),
+                  )
+                : const Icon(Icons.people),
+            label: 'Connections',
+          ),
+          const BottomNavigationBarItem(
             icon: Icon(Icons.nfc_outlined),
             activeIcon: Icon(Icons.nfc),
             label: 'Tap Profile',

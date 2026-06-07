@@ -219,3 +219,140 @@ class ChecklistItem {
     );
   }
 }
+
+class ConnectionPermissionData {
+  final bool shareName;
+  final bool shareEmail;
+  final bool sharePhone;
+  final bool shareWhatsapp;
+  final bool shareLocation;
+
+  ConnectionPermissionData({
+    this.shareName = true,
+    this.shareEmail = true,
+    this.sharePhone = false,
+    this.shareWhatsapp = true,
+    this.shareLocation = false,
+  });
+
+  factory ConnectionPermissionData.fromJson(Map<String, dynamic> json) {
+    return ConnectionPermissionData(
+      shareName: json['shareName'] ?? true,
+      shareEmail: json['shareEmail'] ?? true,
+      sharePhone: json['sharePhone'] ?? false,
+      shareWhatsapp: json['shareWhatsapp'] ?? true,
+      shareLocation: json['shareLocation'] ?? false,
+    );
+  }
+
+  Map<String, dynamic> toJson() => {
+        'shareName': shareName,
+        'shareEmail': shareEmail,
+        'sharePhone': sharePhone,
+        'shareWhatsapp': shareWhatsapp,
+        'shareLocation': shareLocation,
+      };
+}
+
+class ConnectionOther {
+  final int userId;
+  final String? name;
+  final String avatar;
+  final String tagline;
+  final String? email;
+  final String? phone;
+  final String? whatsapp;
+  final int? profileId;
+  final List<Tag> tags;
+
+  ConnectionOther({
+    required this.userId,
+    this.name,
+    required this.avatar,
+    required this.tagline,
+    this.email,
+    this.phone,
+    this.whatsapp,
+    this.profileId,
+    required this.tags,
+  });
+
+  factory ConnectionOther.fromJson(Map<String, dynamic> json) {
+    var tagsList = json['tags'] as List? ?? [];
+    return ConnectionOther(
+      userId: json['userId'],
+      name: json['name'],
+      avatar: json['avatar'] ?? '/profile_avatar.png',
+      tagline: json['tagline'] ?? '',
+      email: json['email'],
+      phone: json['phone'],
+      whatsapp: json['whatsapp'],
+      profileId: json['profileId'],
+      tags: tagsList.map((t) => Tag.fromJson(t)).toList(),
+    );
+  }
+}
+
+class Connection {
+  final int id;
+  final String via;
+  final DateTime connectedAt;
+  final ConnectionOther other;
+  final ConnectionPermissionData? permissions;
+
+  Connection({
+    required this.id,
+    required this.via,
+    required this.connectedAt,
+    required this.other,
+    this.permissions,
+  });
+
+  factory Connection.fromJson(Map<String, dynamic> json) {
+    return Connection(
+      id: json['id'],
+      via: json['via'] ?? 'link',
+      connectedAt: DateTime.tryParse(json['connectedAt'] ?? '') ?? DateTime.now(),
+      other: ConnectionOther.fromJson(json['other']),
+      permissions: json['permissions'] != null
+          ? ConnectionPermissionData.fromJson(json['permissions'])
+          : null,
+    );
+  }
+}
+
+class PendingRequest {
+  final int id;
+  final String via;
+  final DateTime createdAt;
+  final int requesterUserId;
+  final String requesterName;
+  final String requesterAvatar;
+  final String requesterTagline;
+  final int? requesterProfileId;
+
+  PendingRequest({
+    required this.id,
+    required this.via,
+    required this.createdAt,
+    required this.requesterUserId,
+    required this.requesterName,
+    required this.requesterAvatar,
+    required this.requesterTagline,
+    this.requesterProfileId,
+  });
+
+  factory PendingRequest.fromJson(Map<String, dynamic> json) {
+    final r = json['requester'] as Map<String, dynamic>;
+    return PendingRequest(
+      id: json['id'],
+      via: json['via'] ?? 'link',
+      createdAt: DateTime.tryParse(json['createdAt'] ?? '') ?? DateTime.now(),
+      requesterUserId: r['userId'],
+      requesterName: r['name'] ?? '',
+      requesterAvatar: r['avatar'] ?? '/profile_avatar.png',
+      requesterTagline: r['tagline'] ?? '',
+      requesterProfileId: r['profileId'],
+    );
+  }
+}

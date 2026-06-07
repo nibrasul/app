@@ -367,4 +367,110 @@ class ApiService {
     }
     return null;
   }
+
+  // ──────────────────────────────────────────────
+  // Connection APIs
+  // ──────────────────────────────────────────────
+
+  Future<Map<String, dynamic>?> lookupUser(String username) async {
+    try {
+      final url = Uri.parse('$baseUrl/api/connections/lookup?username=${Uri.encodeComponent(username)}');
+      final response = await _sendRequest('GET', url);
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        if (data['success'] == true) return data;
+      }
+    } catch (e) {
+      debugPrint('lookupUser error: $e');
+    }
+    return null;
+  }
+
+  Future<Map<String, dynamic>> sendConnectionRequest(String receiverUsername, {String via = 'link'}) async {
+    try {
+      final url = Uri.parse('$baseUrl/api/connections/request');
+      final response = await _sendRequest(
+        'POST',
+        url,
+        body: jsonEncode({'receiverUsername': receiverUsername, 'via': via}),
+      );
+      final data = jsonDecode(response.body);
+      if (response.statusCode == 200 && data['success'] == true) {
+        return {'success': true};
+      }
+      return {'success': false, 'error': data['error'] ?? 'Request failed', 'status': data['status']};
+    } catch (e) {
+      return {'success': false, 'error': e.toString()};
+    }
+  }
+
+  Future<List<PendingRequest>> getPendingRequests() async {
+    try {
+      final url = Uri.parse('$baseUrl/api/connections/requests');
+      final response = await _sendRequest('GET', url);
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        if (data['success'] == true) {
+          final list = data['requests'] as List? ?? [];
+          return list.map((r) => PendingRequest.fromJson(r)).toList();
+        }
+      }
+    } catch (e) {
+      debugPrint('getPendingRequests error: $e');
+    }
+    return [];
+  }
+
+  Future<Map<String, dynamic>> acceptRequest(int connectionId, ConnectionPermissionData permissions) async {
+    try {
+      final url = Uri.parse('$baseUrl/api/connections/accept');
+      final response = await _sendRequest(
+        'POST',
+        url,
+        body: jsonEncode({'connectionId': connectionId, 'permissions': permissions.toJson()}),
+      );
+      final data = jsonDecode(response.body);
+      if (response.statusCode == 200 && data['success'] == true) {
+        return {'success': true};
+      }
+      return {'success': false, 'error': data['error'] ?? 'Accept failed'};
+    } catch (e) {
+      return {'success': false, 'error': e.toString()};
+    }
+  }
+
+  Future<Map<String, dynamic>> rejectRequest(int connectionId) async {
+    try {
+      final url = Uri.parse('$baseUrl/api/connections/reject');
+      final response = await _sendRequest(
+        'POST',
+        url,
+        body: jsonEncode({'connectionId': connectionId}),
+      );
+      final data = jsonDecode(response.body);
+      if (response.statusCode == 200 && data['success'] == true) {
+        return {'success': true};
+      }
+      return {'success': false, 'error': data['error'] ?? 'Reject failed'};
+    } catch (e) {
+      return {'success': false, 'error': e.toString()};
+    }
+  }
+
+  Future<List<Connection>> getConnections() async {
+    try {
+      final url = Uri.parse('$baseUrl/api/connections');
+      final response = await _sendRequest('GET', url);
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        if (data['success'] == true) {
+          final list = data['connections'] as List? ?? [];
+          return list.map((c) => Connection.fromJson(c)).toList();
+        }
+      }
+    } catch (e) {
+      debugPrint('getConnections error: $e');
+    }
+    return [];
+  }
 }

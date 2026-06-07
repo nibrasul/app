@@ -25,6 +25,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
   List<ChecklistItem> _checklist = [];
   bool _loading = true;
   bool _saving = false;
+  int _pendingCount = 0;
 
   // Controllers
   final _nameController = TextEditingController();
@@ -46,7 +47,13 @@ class _DashboardScreenState extends State<DashboardScreen> {
     _fetchProfile();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _checkForUpdates(silent: true);
+      _fetchPendingCount();
     });
+  }
+
+  Future<void> _fetchPendingCount() async {
+    final pending = await _apiService.getPendingRequests();
+    if (mounted) setState(() => _pendingCount = pending.length);
   }
 
   Future<void> _checkForUpdates({bool silent = false}) async {
@@ -644,12 +651,51 @@ class _DashboardScreenState extends State<DashboardScreen> {
           .replaceAll(RegExp(r'[^a-z0-9]+'), '-')
           .replaceAll(RegExp(r'(^-|-$)'), '');
     }
-    final publicLink = '${_apiService.baseUrl}/${slugify(_profile!.name)}';
+    final publicLink = '${_apiService.baseUrl}/connect/${slugify(_profile!.name)}';
 
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16.0),
       child: Column(
         children: [
+          // Pending Connection Requests Card
+          if (_pendingCount > 0)
+            GestureDetector(
+              onTap: () => Navigator.of(context).pushNamed('/connections'),
+              child: Container(
+                margin: const EdgeInsets.only(bottom: 12),
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [const Color(0xFF6366f1).withValues(alpha: 0.18), const Color(0xFF818cf8).withValues(alpha: 0.10)],
+                  ),
+                  borderRadius: BorderRadius.circular(14),
+                  border: Border.all(color: const Color(0xFF6366f1).withValues(alpha: 0.35)),
+                ),
+                child: Row(
+                  children: [
+                    const Icon(Icons.people, color: Colors.indigoAccent, size: 24),
+                    const SizedBox(width: 14),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            '$_pendingCount Pending Connection${_pendingCount > 1 ? 's' : ''}',
+                            style: GoogleFonts.outfit(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 15),
+                          ),
+                          Text(
+                            'Tap to review requests',
+                            style: GoogleFonts.outfit(color: Colors.white54, fontSize: 12),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const Icon(Icons.chevron_right, color: Colors.white38),
+                  ],
+                ),
+              ),
+            ),
+
           // Public NFC Link Card
           _buildGlassCard(
             children: [
@@ -669,9 +715,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     child: Container(
                       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
                       decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.04),
+                        color: Colors.white.withValues(alpha: 0.04),
                         borderRadius: BorderRadius.circular(8),
-                        border: Border.all(color: Colors.white.withOpacity(0.08)),
+                        border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
                       ),
                       child: Text(
                         publicLink,
