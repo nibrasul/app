@@ -253,7 +253,8 @@ export default function Dashboard() {
     );
   }
 
-  const publicLink = profile ? `${window.location.origin}/${profile.userId}` : '';
+  const slugify = (text: string) => text.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+  const publicLink = profile ? `${window.location.origin}/${slugify(profile.name)}` : '';
 
   return (
     <div className={styles.wrapper}>

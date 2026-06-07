@@ -6,15 +6,47 @@ import styles from './page.module.css';
 export default async function PublicProfile({ params }: { params: Promise<{ userId: string }> }) {
   const { userId } = await params;
 
+  let profile = null;
+
+  // 1. Try finding by numeric userId first
   const parsedUserId = parseInt(userId, 10);
-  if (isNaN(parsedUserId)) {
-    return notFound();
+  if (!isNaN(parsedUserId)) {
+    profile = await prisma.profile.findUnique({
+      where: { userId: parsedUserId },
+      include: { tags: true, socials: true }
+    });
   }
 
-  const profile = await prisma.profile.findUnique({
-    where: { userId: parsedUserId },
-    include: { tags: true, socials: true }
-  });
+  // 2. Fallback to finding by slugified name
+  if (!profile) {
+    const slugify = (text: string) =>
+      text
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/(^-|-$)/g, '');
+
+    const normalizedParam = userId.toLowerCase().trim();
+
+    // Fast path: query database replacing hyphens with spaces
+    const spaceSeparated = normalizedParam.replace(/-/g, ' ');
+    profile = await prisma.profile.findFirst({
+      where: {
+        name: {
+          equals: spaceSeparated,
+          mode: 'insensitive'
+        }
+      },
+      include: { tags: true, socials: true }
+    });
+
+    // Full in-memory search fallback (handles cases where name slugification is complex)
+    if (!profile) {
+      const allProfiles = await prisma.profile.findMany({
+        include: { tags: true, socials: true }
+      });
+      profile = allProfiles.find(p => slugify(p.name) === normalizedParam) || null;
+    }
+  }
 
   if (!profile) {
     return notFound();

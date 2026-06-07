@@ -24,6 +24,8 @@ interface LeaderboardProfile {
   tags: Tag[];
 }
 
+const slugify = (text: string) => text.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+
 export default function LeaderboardPage() {
   const [leaderboard, setLeaderboard] = useState<LeaderboardProfile[]>([]);
   const [loading, setLoading] = useState(true);
@@ -135,7 +137,7 @@ export default function LeaderboardPage() {
                     </div>
 
                     <div className={styles.actionCol}>
-                      <Link href={`/${profile.userId}`} className={styles.viewBtn}>
+                      <Link href={`/${slugify(profile.name)}`} className={styles.viewBtn}>
                         View Profile
                       </Link>
                     </div>
