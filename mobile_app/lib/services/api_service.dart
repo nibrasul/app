@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import '../models/profile.dart';
 import 'client_stub.dart'
     if (dart.library.html) 'client_web.dart' as platform_client;
@@ -334,5 +335,36 @@ class ApiService {
       debugPrint('getLeaderboard error: $e');
     }
     return [];
+  }
+
+  Future<Map<String, dynamic>?> checkLatestVersion() async {
+    try {
+      final url = Uri.parse('$baseUrl/api/version');
+      final response = await _client.get(url);
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        if (data['success'] == true) {
+          final serverBuild = data['buildNumber'] as int;
+
+          final packageInfo = await PackageInfo.fromPlatform();
+          final localBuildStr = packageInfo.buildNumber;
+          final localBuild = int.tryParse(localBuildStr) ?? 0;
+
+          if (serverBuild > localBuild) {
+            return {
+              'versionName': data['versionName'],
+              'buildNumber': serverBuild,
+              'forceUpdate': data['forceUpdate'] ?? false,
+              'downloadUrl': data['downloadUrl'],
+              'changelog': data['changelog'] ?? [],
+            };
+          }
+        }
+      }
+    } catch (e) {
+      debugPrint('checkLatestVersion error: $e');
+    }
+    return null;
   }
 }

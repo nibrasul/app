@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../models/profile.dart';
 import '../services/api_service.dart';
 
@@ -43,6 +44,133 @@ class _DashboardScreenState extends State<DashboardScreen> {
   void initState() {
     super.initState();
     _fetchProfile();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _checkForUpdates(silent: true);
+    });
+  }
+
+  Future<void> _checkForUpdates({bool silent = false}) async {
+    final updateInfo = await _apiService.checkLatestVersion();
+    if (updateInfo != null) {
+      if (mounted) {
+        _showUpdateDialog(updateInfo);
+      }
+    } else if (!silent) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('You are on the latest version of Tapfolio.'),
+            backgroundColor: Color(0xFF10B981),
+          ),
+        );
+      }
+    }
+  }
+
+  void _showUpdateDialog(Map<String, dynamic> updateInfo) {
+    final versionName = updateInfo['versionName'] as String;
+    final buildNumber = updateInfo['buildNumber'] as int;
+    final forceUpdate = updateInfo['forceUpdate'] as bool;
+    final downloadUrl = updateInfo['downloadUrl'] as String;
+    final changelog = updateInfo['changelog'] as List<dynamic>;
+
+    showDialog(
+      context: context,
+      barrierDismissible: !forceUpdate,
+      builder: (context) {
+        return PopScope(
+          canPop: !forceUpdate,
+          child: AlertDialog(
+            backgroundColor: const Color(0xFF161824),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+              side: BorderSide(color: Colors.white.withOpacity(0.08)),
+            ),
+            title: Text(
+              'New Version Available',
+              style: GoogleFonts.outfit(color: Colors.white, fontWeight: FontWeight.bold),
+            ),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Version $versionName (Build $buildNumber)',
+                  style: GoogleFonts.outfit(color: Colors.indigoAccent, fontWeight: FontWeight.bold, fontSize: 15),
+                ),
+                const SizedBox(height: 12),
+                if (changelog.isNotEmpty) ...[
+                  Text(
+                    'Changelog:',
+                    style: GoogleFonts.outfit(color: Colors.white70, fontWeight: FontWeight.w600, fontSize: 13),
+                  ),
+                  const SizedBox(height: 6),
+                  Flexible(
+                    child: SingleChildScrollView(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: changelog.map((item) => Padding(
+                          padding: const EdgeInsets.only(bottom: 4),
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const Text('• ', style: TextStyle(color: Colors.indigoAccent)),
+                              Expanded(
+                                child: Text(
+                                  item.toString(),
+                                  style: GoogleFonts.outfit(color: Colors.white60, fontSize: 13),
+                                ),
+                              ),
+                            ],
+                          ),
+                        )).toList(),
+                      ),
+                    ),
+                  ),
+                ],
+                if (forceUpdate) ...[
+                  const SizedBox(height: 16),
+                  Text(
+                    'This is a required update to continue using the application.',
+                    style: GoogleFonts.outfit(color: Colors.redAccent, fontSize: 12, fontWeight: FontWeight.bold),
+                  ),
+                ],
+              ],
+            ),
+            actions: [
+              if (!forceUpdate)
+                TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: Text(
+                    'Later',
+                    style: GoogleFonts.outfit(color: Colors.white54),
+                  ),
+                ),
+              ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.indigoAccent,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                ),
+                onPressed: () async {
+                  final uri = Uri.parse(downloadUrl);
+                  if (await canLaunchUrl(uri)) {
+                    await launchUrl(uri, mode: LaunchMode.externalApplication);
+                  } else {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('Could not open download link: $downloadUrl')),
+                    );
+                  }
+                },
+                child: Text(
+                  'Update Now',
+                  style: GoogleFonts.outfit(color: Colors.white, fontWeight: FontWeight.bold),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
   }
 
   @override
@@ -1002,6 +1130,36 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   ),
                 );
               }),
+            ],
+          ),
+
+          // App Update Card
+          _buildGlassCard(
+            children: [
+              Text(
+                'Application Update',
+                style: GoogleFonts.outfit(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                'Check if you are running the latest version of Tapfolio.',
+                style: GoogleFonts.outfit(color: Colors.white60, fontSize: 13),
+              ),
+              const SizedBox(height: 14),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.indigoAccent,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                  ),
+                  onPressed: () => _checkForUpdates(silent: false),
+                  child: Text(
+                    'Check for Updates',
+                    style: GoogleFonts.outfit(color: Colors.white, fontWeight: FontWeight.bold),
+                  ),
+                ),
+              ),
             ],
           ),
         ],

@@ -61,3 +61,18 @@ model HistoryEvent {
   color     String?
   createdAt DateTime @default(now())
 }
+
+model AppVersion {
+  id          Int      @id @default(autoincrement())
+  versionName String   @map("version_name")
+  buildNumber Int      @map("build_number")
+  changelog   String?
+  apkUrl      String   @map("apk_url")
+  forceUpdate Boolean  @default(false) @map("force_update")
+  isCurrent   Boolean  @default(false) @map("is_current")
+  isDraft     Boolean  @default(true) @map("is_draft")
+  channel     String   @default("stable")
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  @@map("app_versions")
+}
