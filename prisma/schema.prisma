@@ -16,6 +16,7 @@ model User {
   createdAt           DateTime         @default(now())
   sentConnections     Connection[]     @relation("Requester")
   receivedConnections Connection[]     @relation("Receiver")
+  connectionVisibilities ConnectionVisibility[]
 }
 
 model Profile {
@@ -95,6 +96,7 @@ model Connection {
 
   requester  User                  @relation("Requester", fields: [requesterId], references: [id], onDelete: Cascade)
   receiver   User                  @relation("Receiver",  fields: [receiverId],  references: [id], onDelete: Cascade)
+  visibilities ConnectionVisibility[]
 
   @@unique([requesterId, receiverId])
   @@map("connections")
@@ -112,4 +114,22 @@ model SharingSettings {
   user          User    @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("sharing_settings")
+}
+
+model ConnectionVisibility {
+  id              Int      @id @default(autoincrement())
+  connectionId    Int
+  userId          Int
+  shareName       Boolean  @default(true)
+  shareEmail      Boolean  @default(true)
+  sharePhone      Boolean  @default(false)
+  shareWhatsapp   Boolean  @default(true)
+  shareLocation   Boolean  @default(false)
+  sharedSocialIds Int[]
+
+  connection      Connection @relation(fields: [connectionId], references: [id], onDelete: Cascade)
+  user            User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([connectionId, userId])
+  @@map("connection_visibilities")
 }

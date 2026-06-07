@@ -242,6 +242,7 @@ class ConnectionPermissionData {
   final bool sharePhone;
   final bool shareWhatsapp;
   final bool shareLocation;
+  final List<int> sharedSocialIds;
 
   ConnectionPermissionData({
     this.shareName = true,
@@ -249,15 +250,18 @@ class ConnectionPermissionData {
     this.sharePhone = false,
     this.shareWhatsapp = true,
     this.shareLocation = false,
+    this.sharedSocialIds = const [],
   });
 
   factory ConnectionPermissionData.fromJson(Map<String, dynamic> json) {
+    var socialIdsList = json['sharedSocialIds'] as List? ?? [];
     return ConnectionPermissionData(
       shareName: json['shareName'] ?? true,
       shareEmail: json['shareEmail'] ?? true,
       sharePhone: json['sharePhone'] ?? false,
       shareWhatsapp: json['shareWhatsapp'] ?? true,
       shareLocation: json['shareLocation'] ?? false,
+      sharedSocialIds: socialIdsList.map((id) => id as int).toList(),
     );
   }
 
@@ -267,6 +271,7 @@ class ConnectionPermissionData {
         'sharePhone': sharePhone,
         'shareWhatsapp': shareWhatsapp,
         'shareLocation': shareLocation,
+        'sharedSocialIds': sharedSocialIds,
       };
 }
 
@@ -281,6 +286,7 @@ class ConnectionOther {
   final String? location;
   final int? profileId;
   final List<Tag> tags;
+  final List<SocialLink> socials;
 
   ConnectionOther({
     required this.userId,
@@ -293,10 +299,12 @@ class ConnectionOther {
     this.location,
     this.profileId,
     required this.tags,
+    required this.socials,
   });
 
   factory ConnectionOther.fromJson(Map<String, dynamic> json) {
     var tagsList = json['tags'] as List? ?? [];
+    var socialsList = json['socials'] as List? ?? [];
     return ConnectionOther(
       userId: json['userId'],
       name: json['name'],
@@ -308,6 +316,7 @@ class ConnectionOther {
       location: json['location'],
       profileId: json['profileId'],
       tags: tagsList.map((t) => Tag.fromJson(t)).toList(),
+      socials: socialsList.map((s) => SocialLink.fromJson(s)).toList(),
     );
   }
 }
@@ -318,6 +327,7 @@ class Connection {
   final DateTime connectedAt;
   final ConnectionOther other;
   final ConnectionPermissionData? permissions;
+  final ConnectionPermissionData? myPermissions;
 
   Connection({
     required this.id,
@@ -325,6 +335,7 @@ class Connection {
     required this.connectedAt,
     required this.other,
     this.permissions,
+    this.myPermissions,
   });
 
   factory Connection.fromJson(Map<String, dynamic> json) {
@@ -335,6 +346,9 @@ class Connection {
       other: ConnectionOther.fromJson(json['other']),
       permissions: json['permissions'] != null
           ? ConnectionPermissionData.fromJson(json['permissions'])
+          : null,
+      myPermissions: json['myPermissions'] != null
+          ? ConnectionPermissionData.fromJson(json['myPermissions'])
           : null,
     );
   }
@@ -349,6 +363,10 @@ class PendingRequest {
   final String requesterAvatar;
   final String requesterTagline;
   final int? requesterProfileId;
+  final String requesterDiamonds;
+  final int requesterConnectionCount;
+  final int requesterTapCount;
+  final List<Tag> requesterTags;
 
   PendingRequest({
     required this.id,
@@ -359,10 +377,15 @@ class PendingRequest {
     required this.requesterAvatar,
     required this.requesterTagline,
     this.requesterProfileId,
+    required this.requesterDiamonds,
+    required this.requesterConnectionCount,
+    required this.requesterTapCount,
+    required this.requesterTags,
   });
 
   factory PendingRequest.fromJson(Map<String, dynamic> json) {
     final r = json['requester'] as Map<String, dynamic>;
+    var tagsList = r['tags'] as List? ?? [];
     return PendingRequest(
       id: json['id'],
       via: json['via'] ?? 'link',
@@ -372,6 +395,10 @@ class PendingRequest {
       requesterAvatar: r['avatar'] ?? '/profile_avatar.png',
       requesterTagline: r['tagline'] ?? '',
       requesterProfileId: r['profileId'],
+      requesterDiamonds: r['diamonds'] ?? '0',
+      requesterConnectionCount: r['connectionCount'] ?? 0,
+      requesterTapCount: r['tapCount'] ?? 0,
+      requesterTags: tagsList.map((t) => Tag.fromJson(t)).toList(),
     );
   }
 }

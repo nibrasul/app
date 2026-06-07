@@ -23,6 +23,7 @@ class _ProfileViewScreenState extends State<ProfileViewScreen> {
   String? _error;
   bool _connecting = false;
   bool _connected = false;
+  String? _connectionStatus;
 
   @override
   void initState() {
@@ -45,6 +46,7 @@ class _ProfileViewScreenState extends State<ProfileViewScreen> {
       _error = null;
       _profile = null;
       _connected = false;
+      _connectionStatus = null;
     });
 
     final res = await _apiService.getProfile(userId: userId);
@@ -52,6 +54,8 @@ class _ProfileViewScreenState extends State<ProfileViewScreen> {
     if (res != null) {
       setState(() {
         _profile = res['profile'];
+        _connectionStatus = res['connectionStatus'];
+        _connected = _connectionStatus == 'accepted';
       });
     } else {
       setState(() {
@@ -65,13 +69,13 @@ class _ProfileViewScreenState extends State<ProfileViewScreen> {
   }
 
   Future<void> _handleConnect() async {
-    if (_profile == null || _connected || _connecting) return;
+    if (_profile == null || _connected || _connecting || _connectionStatus == 'pending') return;
 
     setState(() {
       _connecting = true;
     });
 
-    final res = await _apiService.tapProfile(_profile!.id);
+    final res = await _apiService.sendConnectionRequest(_profile!.username, via: 'app');
 
     setState(() {
       _connecting = false;
@@ -79,8 +83,7 @@ class _ProfileViewScreenState extends State<ProfileViewScreen> {
 
     if (res['success'] == true) {
       setState(() {
-        _connected = true;
-        _profile = res['profile'];
+        _connectionStatus = 'pending';
       });
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -204,14 +207,26 @@ class _ProfileViewScreenState extends State<ProfileViewScreen> {
                   height: 50,
                   child: ElevatedButton(
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: _connected ? const Color(0xFF10B981) : Colors.indigoAccent,
+                      backgroundColor: _connectionStatus == 'accepted'
+                          ? const Color(0xFF10B981)
+                          : _connectionStatus == 'pending'
+                              ? const Color(0xFFf59e0b)
+                              : Colors.indigoAccent,
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                     ),
-                    onPressed: _connecting || _connected ? null : _handleConnect,
+                    onPressed: _connecting || _connectionStatus == 'accepted' || _connectionStatus == 'pending' || _connectionStatus == 'blocked'
+                        ? null
+                        : _handleConnect,
                     child: _connecting
                         ? const CircularProgressIndicator(color: Colors.white)
                         : Text(
-                            _connected ? '✓ Connected!' : 'Connect with me',
+                            _connectionStatus == 'accepted'
+                                ? '✓ Connected!'
+                                : _connectionStatus == 'pending'
+                                    ? 'Pending Acceptance...'
+                                    : _connectionStatus == 'blocked'
+                                        ? 'Blocked'
+                                        : 'Connect with me',
                             style: GoogleFonts.outfit(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white),
                           ),
                   ),

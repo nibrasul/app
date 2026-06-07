@@ -5,6 +5,7 @@ import 'package:url_launcher/url_launcher.dart';
 import '../models/profile.dart';
 import '../services/api_service.dart';
 import '../widgets/connection_permission_sheet.dart';
+import '../widgets/connection_visibility_sheet.dart';
 
 class ConnectionsScreen extends StatefulWidget {
   const ConnectionsScreen({Key? key}) : super(key: key);
@@ -180,73 +181,132 @@ class _ConnectionsScreenState extends State<ConnectionsScreen>
         child: Container(
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
-            color: Colors.white.withValues(alpha: 0.04),
+            color: Colors.white.withOpacity(0.04),
             borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
+            border: Border.all(color: Colors.white.withOpacity(0.08)),
           ),
-          child: Row(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              CircleAvatar(
-                radius: 28,
-                backgroundImage: NetworkImage(avatarUrl),
-                backgroundColor: const Color(0xFF1a1a2e),
-              ),
-              const SizedBox(width: 14),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      req.requesterName,
-                      style: GoogleFonts.outfit(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 15),
-                    ),
-                    if (req.requesterTagline.isNotEmpty)
-                      Text(
-                        req.requesterTagline,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: GoogleFonts.outfit(color: Colors.white54, fontSize: 12),
-                      ),
-                    if (req.via == 'nfc')
-                      Text('via NFC tap', style: GoogleFonts.outfit(color: Colors.indigoAccent, fontSize: 11)),
-                  ],
-                ),
-              ),
-              const SizedBox(width: 8),
-              Column(
+              Row(
                 children: [
-                  SizedBox(
-                    width: 80,
-                    child: ElevatedButton(
-                      onPressed: () => _accept(req),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF6366f1),
-                        foregroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(vertical: 8),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                        elevation: 0,
-                        textStyle: GoogleFonts.outfit(fontWeight: FontWeight.w600, fontSize: 13),
-                      ),
-                      child: const Text('Accept'),
+                  CircleAvatar(
+                    radius: 26,
+                    backgroundImage: NetworkImage(avatarUrl),
+                    backgroundColor: const Color(0xFF1a1a2e),
+                  ),
+                  const SizedBox(width: 14),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          req.requesterName,
+                          style: GoogleFonts.outfit(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 15),
+                        ),
+                        if (req.requesterTagline.isNotEmpty)
+                          Text(
+                            req.requesterTagline,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: GoogleFonts.outfit(color: Colors.white54, fontSize: 12),
+                          ),
+                        const SizedBox(height: 4),
+                        Row(
+                          children: [
+                            Text(
+                              '💎 ${req.requesterDiamonds}',
+                              style: GoogleFonts.outfit(color: Colors.amber, fontSize: 11, fontWeight: FontWeight.w600),
+                            ),
+                            const SizedBox(width: 10),
+                            Text(
+                              '👥 ${req.requesterConnectionCount} connections',
+                              style: GoogleFonts.outfit(color: Colors.tealAccent, fontSize: 11),
+                            ),
+                            const SizedBox(width: 10),
+                            Text(
+                              '⚡ ${req.requesterTapCount} taps',
+                              style: GoogleFonts.outfit(color: Colors.purpleAccent, fontSize: 11),
+                            ),
+                            if (req.via == 'nfc') ...[
+                              const SizedBox(width: 10),
+                              Text(
+                                'via NFC',
+                                style: GoogleFonts.outfit(color: Colors.indigoAccent, fontSize: 11, fontWeight: FontWeight.w600),
+                              ),
+                            ]
+                          ],
+                        ),
+                      ],
                     ),
                   ),
-                  const SizedBox(height: 6),
-                  SizedBox(
-                    width: 80,
-                    child: OutlinedButton(
-                      onPressed: () => _reject(req),
-                      style: OutlinedButton.styleFrom(
-                        foregroundColor: Colors.white54,
-                        side: const BorderSide(color: Colors.white12),
-                        padding: const EdgeInsets.symmetric(vertical: 8),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                        textStyle: GoogleFonts.outfit(fontSize: 13),
+                  const SizedBox(width: 8),
+                  Column(
+                    children: [
+                      SizedBox(
+                        width: 80,
+                        child: ElevatedButton(
+                          onPressed: () => _accept(req),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: const Color(0xFF6366f1),
+                            foregroundColor: Colors.white,
+                            padding: const EdgeInsets.symmetric(vertical: 8),
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                            elevation: 0,
+                            textStyle: GoogleFonts.outfit(fontWeight: FontWeight.w600, fontSize: 13),
+                          ),
+                          child: const Text('Accept'),
+                        ),
                       ),
-                      child: const Text('Reject'),
-                    ),
+                      const SizedBox(height: 6),
+                      SizedBox(
+                        width: 80,
+                        child: OutlinedButton(
+                          onPressed: () => _reject(req),
+                          style: OutlinedButton.styleFrom(
+                            foregroundColor: Colors.white54,
+                            side: const BorderSide(color: Colors.white12),
+                            padding: const EdgeInsets.symmetric(vertical: 8),
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                            textStyle: GoogleFonts.outfit(fontSize: 13),
+                          ),
+                          child: const Text('Reject'),
+                        ),
+                      ),
+                    ],
                   ),
                 ],
               ),
+              if (req.requesterTags.isNotEmpty) ...[
+                const SizedBox(height: 12),
+                const Divider(color: Colors.white12, height: 1),
+                const SizedBox(height: 10),
+                Wrap(
+                  spacing: 6,
+                  runSpacing: 6,
+                  children: req.requesterTags.map((t) {
+                    final isLoc = t.type == 'location';
+                    return Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: isLoc
+                            ? const Color(0xFF10b981).withOpacity(0.08)
+                            : const Color(0xFF6366f1).withOpacity(0.08),
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(
+                          color: isLoc
+                              ? const Color(0xFF10b981).withOpacity(0.2)
+                              : const Color(0xFF6366f1).withOpacity(0.2),
+                        ),
+                      ),
+                      child: Text(
+                        '${isLoc ? '📍' : '⚙️'} ${t.text}',
+                        style: GoogleFonts.outfit(fontSize: 11, color: Colors.white70),
+                      ),
+                    );
+                  }).toList(),
+                ),
+              ],
             ],
           ),
         ),
@@ -362,9 +422,87 @@ class _ConnectionsScreenState extends State<ConnectionsScreen>
               _detailRow(Icons.chat_outlined, other.whatsapp!, isLink: true),
             if (other.location != null && other.location!.isNotEmpty)
               _detailRow(Icons.location_on_outlined, other.location!),
+            if (other.socials.isNotEmpty) ...[
+              const Divider(color: Colors.white12),
+              const SizedBox(height: 10),
+              Align(
+                alignment: Alignment.centerLeft,
+                child: Text('Shared Links', style: GoogleFonts.outfit(color: Colors.white, fontSize: 14, fontWeight: FontWeight.bold)),
+              ),
+              const SizedBox(height: 10),
+              Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                alignment: WrapAlignment.start,
+                children: other.socials.map((link) {
+                  final cardColor = Color(int.parse(link.color.replaceFirst('#', '0xFF')));
+                  return InkWell(
+                    onTap: () => launchUrl(Uri.parse(link.url), mode: LaunchMode.externalApplication),
+                    borderRadius: BorderRadius.circular(12),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.02),
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: cardColor.withOpacity(0.3)),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(Icons.link, color: cardColor, size: 16),
+                          const SizedBox(width: 6),
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(link.platform, style: GoogleFonts.outfit(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold)),
+                              Text(link.handle, style: GoogleFonts.outfit(color: Colors.white38, fontSize: 10)),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                  );
+                }).toList(),
+              ),
+            ],
             const SizedBox(height: 16),
+            const Divider(color: Colors.white12),
+            const SizedBox(height: 8),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton.icon(
+                icon: const Icon(Icons.share, size: 16),
+                label: const Text('Manage Sharing with User'),
+                onPressed: () {
+                  Navigator.pop(context);
+                  _showVisibilitySettings(conn);
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.white.withOpacity(0.05),
+                  foregroundColor: Colors.white70,
+                  side: BorderSide(color: Colors.white.withOpacity(0.1)),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  padding: const EdgeInsets.symmetric(vertical: 12),
+                ),
+              ),
+            ),
           ],
         ),
+      ),
+    );
+  }
+
+  void _showVisibilitySettings(Connection conn) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (_) => ConnectionVisibilitySheet(
+        connection: conn,
+        onSaved: () {
+          _refresh();
+        },
       ),
     );
   }

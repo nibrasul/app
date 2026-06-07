@@ -44,12 +44,38 @@ export async function GET(request: Request) {
 
     const scoreData = calculateProfileScore(profile);
 
+    // Check connection status if caller is authenticated and we are querying someone else
+    let connectionStatus: string | null = null;
+    let connectionId: number | null = null;
+
+    const cookieStore = await cookies();
+    const token = cookieStore.get('pertap_jwt')?.value;
+    if (token) {
+      const payload = await verifyJWT(token);
+      if (payload && payload.userId !== profile.userId) {
+        const conn = await prisma.connection.findFirst({
+          where: {
+            OR: [
+              { requesterId: payload.userId, receiverId: profile.userId },
+              { requesterId: profile.userId, receiverId: payload.userId },
+            ],
+          },
+        });
+        if (conn) {
+          connectionStatus = conn.status;
+          connectionId = conn.id;
+        }
+      }
+    }
+
     return NextResponse.json({
       success: true,
       profile,
       score: scoreData.score,
       items: scoreData.items,
-      qualifiesForLeaderboard: scoreData.qualifiesForLeaderboard
+      qualifiesForLeaderboard: scoreData.qualifiesForLeaderboard,
+      connectionStatus,
+      connectionId,
     });
   } catch (error: any) {
     console.error('Profile GET error:', error);

@@ -25,8 +25,18 @@ export async function POST(request: Request) {
     const connection = await prisma.connection.findUnique({
       where: { id: connectionId },
       include: {
-        requester: { include: { profile: true } },
-        receiver: { include: { profile: true } },
+        requester: {
+          include: {
+            profile: { include: { socials: true } },
+            sharingSettings: true,
+          },
+        },
+        receiver: {
+          include: {
+            profile: { include: { socials: true } },
+            sharingSettings: true,
+          },
+        },
       },
     });
 
@@ -47,6 +57,37 @@ export async function POST(request: Request) {
     await prisma.connection.update({
       where: { id: connectionId },
       data: { status: 'accepted' },
+    });
+
+    // Create default connection visibilities copying current global settings
+    const requesterSocialIds = connection.requester.profile?.socials.map((s) => s.id) ?? [];
+    const requesterSettings = connection.requester.sharingSettings;
+    await prisma.connectionVisibility.create({
+      data: {
+        connectionId: connection.id,
+        userId: connection.requesterId,
+        shareName: requesterSettings?.shareName ?? true,
+        shareEmail: requesterSettings?.shareEmail ?? true,
+        sharePhone: requesterSettings?.sharePhone ?? false,
+        shareWhatsapp: requesterSettings?.shareWhatsapp ?? true,
+        shareLocation: requesterSettings?.shareLocation ?? false,
+        sharedSocialIds: requesterSocialIds,
+      },
+    });
+
+    const receiverSocialIds = connection.receiver.profile?.socials.map((s) => s.id) ?? [];
+    const receiverSettings = connection.receiver.sharingSettings;
+    await prisma.connectionVisibility.create({
+      data: {
+        connectionId: connection.id,
+        userId: connection.receiverId,
+        shareName: receiverSettings?.shareName ?? true,
+        shareEmail: receiverSettings?.shareEmail ?? true,
+        sharePhone: receiverSettings?.sharePhone ?? false,
+        shareWhatsapp: receiverSettings?.shareWhatsapp ?? true,
+        shareLocation: receiverSettings?.shareLocation ?? false,
+        sharedSocialIds: receiverSocialIds,
+      },
     });
 
     // Log history events for both parties

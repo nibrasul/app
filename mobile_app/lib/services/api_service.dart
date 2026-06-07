@@ -507,4 +507,28 @@ class ApiService {
       return {'success': false, 'error': e.toString()};
     }
   }
+
+  Future<Map<String, dynamic>> updateConnectionVisibility(
+    int connectionId,
+    ConnectionPermissionData settings,
+  ) async {
+    try {
+      final url = Uri.parse('$baseUrl/api/connections/visibility');
+      final response = await _sendRequest(
+        'POST',
+        url,
+        body: jsonEncode({
+          'connectionId': connectionId,
+          ...settings.toJson(),
+        }),
+      );
+      final data = jsonDecode(response.body);
+      if (response.statusCode == 200 && data['success'] == true) {
+        return {'success': true};
+      }
+      return {'success': false, 'error': data['error'] ?? 'Update failed'};
+    } catch (e) {
+      return {'success': false, 'error': e.toString()};
+    }
+  }
 }

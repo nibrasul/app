@@ -27,25 +27,43 @@ export async function GET() {
                 name: true,
                 avatar: true,
                 tagline: true,
+                diamonds: true,
+                tapCount: true,
+                tags: true,
               },
+            },
+            sentConnections: {
+              where: { status: 'accepted' },
+              select: { id: true },
+            },
+            receivedConnections: {
+              where: { status: 'accepted' },
+              select: { id: true },
             },
           },
         },
       },
     });
 
-    const requests = pending.map(conn => ({
-      id: conn.id,
-      via: conn.via,
-      createdAt: conn.createdAt,
-      requester: {
-        userId: conn.requester.id,
-        name: conn.requester.profile?.name ?? conn.requester.name,
-        avatar: conn.requester.profile?.avatar ?? '/profile_avatar.png',
-        tagline: conn.requester.profile?.tagline ?? '',
-        profileId: conn.requester.profile?.id ?? null,
-      },
-    }));
+    const requests = pending.map(conn => {
+      const connectionCount = (conn.requester.sentConnections?.length ?? 0) + (conn.requester.receivedConnections?.length ?? 0);
+      return {
+        id: conn.id,
+        via: conn.via,
+        createdAt: conn.createdAt,
+        requester: {
+          userId: conn.requester.id,
+          name: conn.requester.profile?.name ?? conn.requester.name,
+          avatar: conn.requester.profile?.avatar ?? '/profile_avatar.png',
+          tagline: conn.requester.profile?.tagline ?? '',
+          profileId: conn.requester.profile?.id ?? null,
+          diamonds: conn.requester.profile?.diamonds ?? '0',
+          connectionCount,
+          tapCount: conn.requester.profile?.tapCount ?? 0,
+          tags: conn.requester.profile?.tags ?? [],
+        },
+      };
+    });
 
     return NextResponse.json({ success: true, requests });
   } catch (error: any) {

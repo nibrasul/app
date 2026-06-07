@@ -1,6 +1,8 @@
 import { notFound } from 'next/navigation';
+import { cookies } from 'next/headers';
 import prisma from '@/lib/db';
-import styles from './page.module.css';
+import { verifyJWT } from '@/lib/auth';
+import ConnectClientPage from './ConnectClientPage';
 
 export default async function ConnectRedirectPage({
   params,
@@ -20,8 +22,31 @@ export default async function ConnectRedirectPage({
     return notFound();
   }
 
-  const deepLinkUrl = `tapfolio://connect/${username}`;
-  const webProfileUrl = `/${username}`;
+  // Check authentication status
+  const cookieStore = await cookies();
+  const token = cookieStore.get('pertap_jwt')?.value;
+  let loggedInUser = null;
+  if (token) {
+    loggedInUser = await verifyJWT(token);
+  }
+
+  // Check connection status if caller is logged in
+  let connectionStatus: string | null = null;
+  if (loggedInUser && loggedInUser.userId !== profile.userId) {
+    const conn = await prisma.connection.findFirst({
+      where: {
+        OR: [
+          { requesterId: loggedInUser.userId, receiverId: profile.userId },
+          { requesterId: profile.userId, receiverId: loggedInUser.userId },
+        ],
+      },
+    });
+    if (conn) {
+      connectionStatus = conn.status;
+    }
+  } else if (loggedInUser && loggedInUser.userId === profile.userId) {
+    connectionStatus = 'accepted'; // Cannot connect with self
+  }
 
   return (
     <>
@@ -30,61 +55,18 @@ export default async function ConnectRedirectPage({
         name="description"
         content={`Connect with ${profile.name} on Tapfolio${profile.tagline ? ': ' + profile.tagline : ''}`}
       />
-      {/* Auto-try opening the app, fallback to web after 1.5s */}
-      <script
-        dangerouslySetInnerHTML={{
-          __html: `
-            (function() {
-              var username = ${JSON.stringify(username)};
-              var webUrl = ${JSON.stringify(webProfileUrl)};
-              var deepLink = ${JSON.stringify(deepLinkUrl)};
-              var isMobile = /android|iphone|ipad|ipod/i.test(navigator.userAgent);
-
-              if (isMobile) {
-                var start = Date.now();
-                var timeout = setTimeout(function() {
-                  if (Date.now() - start < 2500) {
-                    window.location.replace(webUrl);
-                  }
-                }, 1500);
-
-                window.addEventListener('blur', function() {
-                  clearTimeout(timeout);
-                });
-
-                window.location.href = deepLink;
-              }
-            })();
-          `,
+      <ConnectClientPage
+        username={username}
+        profile={{
+          id: profile.id,
+          userId: profile.userId,
+          name: profile.name,
+          avatar: profile.avatar,
+          tagline: profile.tagline ?? '',
         }}
+        isLoggedIn={loggedInUser !== null}
+        initialConnectionStatus={connectionStatus}
       />
-      <div className={styles.wrapper}>
-        <div className={styles.card}>
-          <img
-            src={profile.avatar || '/profile_avatar.png'}
-            alt={profile.name}
-            className={styles.avatar}
-          />
-          <h1 className={styles.name}>{profile.name}</h1>
-          {profile.tagline && <p className={styles.tagline}>{profile.tagline}</p>}
-
-          <div className={styles.actions}>
-            <a href={`tapfolio://connect/${username}`} className={styles.openAppBtn} id="open-app-btn">
-              Open in Tapfolio App
-            </a>
-            <a href={webProfileUrl} className={styles.viewProfileLink} id="view-profile-link">
-              View web profile instead
-            </a>
-          </div>
-
-          <p className={styles.hint}>
-            Don&apos;t have Tapfolio?{' '}
-            <a href="https://play.google.com/store/apps" target="_blank" rel="noopener noreferrer">
-              Download it
-            </a>
-          </p>
-        </div>
-      </div>
     </>
   );
 }

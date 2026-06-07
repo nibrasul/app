@@ -30,6 +30,9 @@ export default function Header() {
           <Link href="/dashboard" className={`${styles.link} ${pathname === '/dashboard' ? styles.active : ''}`}>
             Dashboard
           </Link>
+          <Link href="/connections" className={`${styles.link} ${pathname === '/connections' ? styles.active : ''}`}>
+            Connections
+          </Link>
           <Link href="/history" className={`${styles.link} ${pathname === '/history' ? styles.active : ''}`}>
             Logs
           </Link>
