@@ -509,7 +509,14 @@ class _DashboardScreenState extends State<DashboardScreen> {
       );
     }
 
-    final publicLink = '${_apiService.baseUrl}/${_profile!.userId}';
+    String slugify(String text) {
+      return text
+          .toLowerCase()
+          .trim()
+          .replaceAll(RegExp(r'[^a-z0-9]+'), '-')
+          .replaceAll(RegExp(r'(^-|-$)'), '');
+    }
+    final publicLink = '${_apiService.baseUrl}/${slugify(_profile!.name)}';
 
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16.0),
