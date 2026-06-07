@@ -151,6 +151,42 @@
   cursor: not-allowed;
 }
 
+.passwordWrapper {
+  position: relative;
+  display: flex;
+  width: 100%;
+}
+
+.passwordWrapper input {
+  width: 100%;
+  padding-right: 2.75rem !important;
+}
+
+.togglePasswordBtn {
+  position: absolute;
+  right: 0.75rem;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  padding: 0.25rem;
+  color: var(--text-secondary);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color var(--transition-fast);
+  border-radius: 4px;
+}
+
+.togglePasswordBtn:hover {
+  color: var(--text-primary);
+}
+
+.togglePasswordBtn:focus-visible {
+  outline: 2px solid var(--border-focus);
+}
+
 @media (max-width: 480px) {
   .authCard {
     padding: 2rem 1.5rem;

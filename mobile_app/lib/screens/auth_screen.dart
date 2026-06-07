@@ -29,6 +29,8 @@ class _AuthScreenState extends State<AuthScreen> with SingleTickerProviderStateM
 
   bool _isLoading = false;
   String? _errorMessage;
+  bool _obscureLoginPassword = true;
+  bool _obscureRegisterPassword = true;
 
   @override
   void initState() {
@@ -115,6 +117,7 @@ class _AuthScreenState extends State<AuthScreen> with SingleTickerProviderStateM
     required String label,
     required IconData icon,
     bool obscureText = false,
+    Widget? suffixIcon,
     String? Function(String?)? validator,
   }) {
     return Container(
@@ -133,6 +136,7 @@ class _AuthScreenState extends State<AuthScreen> with SingleTickerProviderStateM
           labelText: label,
           labelStyle: GoogleFonts.outfit(color: Colors.white60),
           prefixIcon: Icon(icon, color: Colors.indigoAccent),
+          suffixIcon: suffixIcon,
           border: InputBorder.none,
           contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
         ),
@@ -260,8 +264,19 @@ class _AuthScreenState extends State<AuthScreen> with SingleTickerProviderStateM
                                               controller: _loginPasswordController,
                                               label: 'Password',
                                               icon: Icons.lock_outline,
-                                              obscureText: true,
+                                              obscureText: _obscureLoginPassword,
                                               validator: (val) => val == null || val.length < 6 ? 'Password must be 6+ characters' : null,
+                                              suffixIcon: IconButton(
+                                                icon: Icon(
+                                                  _obscureLoginPassword ? Icons.visibility_off_outlined : Icons.visibility_outlined,
+                                                  color: Colors.white60,
+                                                ),
+                                                onPressed: () {
+                                                  setState(() {
+                                                    _obscureLoginPassword = !_obscureLoginPassword;
+                                                  });
+                                                },
+                                              ),
                                             ),
                                             const SizedBox(height: 20),
                                             if (_errorMessage != null)
@@ -322,8 +337,19 @@ class _AuthScreenState extends State<AuthScreen> with SingleTickerProviderStateM
                                               controller: _registerPasswordController,
                                               label: 'Password',
                                               icon: Icons.lock_outline,
-                                              obscureText: true,
+                                              obscureText: _obscureRegisterPassword,
                                               validator: (val) => val == null || val.length < 6 ? 'Password must be 6+ characters' : null,
+                                              suffixIcon: IconButton(
+                                                icon: Icon(
+                                                  _obscureRegisterPassword ? Icons.visibility_off_outlined : Icons.visibility_outlined,
+                                                  color: Colors.white60,
+                                                ),
+                                                onPressed: () {
+                                                  setState(() {
+                                                    _obscureRegisterPassword = !_obscureRegisterPassword;
+                                                  });
+                                                },
+                                              ),
                                             ),
                                             const SizedBox(height: 20),
                                             if (_errorMessage != null)
