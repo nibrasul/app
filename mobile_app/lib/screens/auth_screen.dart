@@ -24,6 +24,7 @@ class _AuthScreenState extends State<AuthScreen> with SingleTickerProviderStateM
   // Register Form
   final _registerFormKey = GlobalKey<FormState>();
   final _registerNameController = TextEditingController();
+  final _registerUsernameController = TextEditingController();
   final _registerEmailController = TextEditingController();
   final _registerPasswordController = TextEditingController();
 
@@ -36,6 +37,11 @@ class _AuthScreenState extends State<AuthScreen> with SingleTickerProviderStateM
   void initState() {
     super.initState();
     _tabController = TabController(length: 2, vsync: this);
+    _tabController.addListener(() {
+      if (mounted) {
+        setState(() {});
+      }
+    });
   }
 
   @override
@@ -44,6 +50,7 @@ class _AuthScreenState extends State<AuthScreen> with SingleTickerProviderStateM
     _loginEmailController.dispose();
     _loginPasswordController.dispose();
     _registerNameController.dispose();
+    _registerUsernameController.dispose();
     _registerEmailController.dispose();
     _registerPasswordController.dispose();
     super.dispose();
@@ -84,10 +91,11 @@ class _AuthScreenState extends State<AuthScreen> with SingleTickerProviderStateM
     });
 
     final name = _registerNameController.text.trim();
+    final username = _registerUsernameController.text.trim().toLowerCase();
     final email = _registerEmailController.text.trim();
     final password = _registerPasswordController.text;
 
-    final result = await _apiService.register(name, email, password);
+    final result = await _apiService.register(name, username, email, password);
 
     setState(() {
       _isLoading = false;
@@ -103,6 +111,7 @@ class _AuthScreenState extends State<AuthScreen> with SingleTickerProviderStateM
       _tabController.animateTo(0); // Switch to Login Tab
       _loginEmailController.text = email;
       _registerNameController.clear();
+      _registerUsernameController.clear();
       _registerEmailController.clear();
       _registerPasswordController.clear();
     } else {
@@ -244,7 +253,7 @@ class _AuthScreenState extends State<AuthScreen> with SingleTickerProviderStateM
                               child: AnimatedSize(
                                 duration: const Duration(milliseconds: 300),
                                 child: SizedBox(
-                                  height: 340,
+                                  height: _tabController.index == 0 ? 250 : 380,
                                   child: TabBarView(
                                     controller: _tabController,
                                     children: [
@@ -326,6 +335,21 @@ class _AuthScreenState extends State<AuthScreen> with SingleTickerProviderStateM
                                               label: 'Full Name',
                                               icon: Icons.person_outline,
                                               validator: (val) => val == null || val.isEmpty ? 'Enter your name' : null,
+                                            ),
+                                            _buildGlassTextField(
+                                              controller: _registerUsernameController,
+                                              label: 'Username',
+                                              icon: Icons.alternate_email_outlined,
+                                              validator: (val) {
+                                                if (val == null || val.trim().isEmpty) return 'Enter a username';
+                                                if (val.trim().length < 3 || val.trim().length > 20) {
+                                                  return 'Username must be 3-20 characters';
+                                                }
+                                                if (!RegExp(r'^[a-z0-9_-]+$').hasMatch(val.trim().toLowerCase())) {
+                                                  return 'Only letters, numbers, -, and _ allowed';
+                                                }
+                                                return null;
+                                              },
                                             ),
                                             _buildGlassTextField(
                                               controller: _registerEmailController,
