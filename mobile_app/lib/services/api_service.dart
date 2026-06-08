@@ -162,6 +162,102 @@ class ApiService {
     }
   }
 
+  Future<Map<String, dynamic>> googleLogin(String idToken, {String? email, String? name}) async {
+    try {
+      final url = Uri.parse('$baseUrl/api/auth/google');
+      final response = await _sendRequest(
+        'POST',
+        url,
+        authenticated: false,
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({
+          'idToken': idToken,
+          if (email != null) 'email': email,
+          if (name != null) 'name': name,
+        }),
+      );
+
+      final data = jsonDecode(response.body);
+      if (response.statusCode == 200 && data['success'] == true) {
+        if (kIsWeb) {
+          _jwtToken = 'web_session';
+          final prefs = await SharedPreferences.getInstance();
+          await prefs.setBool('pertap_logged_in', true);
+        } else {
+          _updateCookie(response);
+        }
+        return {'success': true, 'user': data['user']};
+      } else {
+        return {'success': false, 'error': data['error'] ?? 'Google login failed'};
+      }
+    } catch (e) {
+      return {'success': false, 'error': e.toString()};
+    }
+  }
+
+  Future<Map<String, dynamic>> checkUsernameAvailability(String username) async {
+    try {
+      final url = Uri.parse('$baseUrl/api/auth/username-check?username=${Uri.encodeComponent(username)}');
+      final response = await _sendRequest(
+        'GET',
+        url,
+        authenticated: false,
+      );
+
+      final data = jsonDecode(response.body);
+      if (response.statusCode == 200) {
+        return {
+          'success': true,
+          'available': data['available'] ?? false,
+          'suggestions': List<String>.from(data['suggestions'] ?? []),
+        };
+      } else {
+        return {'success': false, 'error': data['error'] ?? 'Username check failed'};
+      }
+    } catch (e) {
+      return {'success': false, 'error': e.toString()};
+    }
+  }
+
+  Future<Map<String, dynamic>> submitOnboarding(Map<String, dynamic> payload) async {
+    try {
+      final url = Uri.parse('$baseUrl/api/profile/onboarding');
+      final response = await _sendRequest(
+        'PUT',
+        url,
+        body: jsonEncode(payload),
+      );
+
+      final data = jsonDecode(response.body);
+      if (response.statusCode == 200 && data['success'] == true) {
+        return {'success': true};
+      } else {
+        return {'success': false, 'error': data['error'] ?? 'Onboarding failed'};
+      }
+    } catch (e) {
+      return {'success': false, 'error': e.toString()};
+    }
+  }
+
+  Future<Map<String, dynamic>> initProfile() async {
+    try {
+      final url = Uri.parse('$baseUrl/api/profile/init');
+      final response = await _sendRequest(
+        'POST',
+        url,
+      );
+
+      final data = jsonDecode(response.body);
+      if (response.statusCode == 200 && data['success'] == true) {
+        return {'success': true, 'profile': data['profile']};
+      } else {
+        return {'success': false, 'error': data['error'] ?? 'Profile initialization failed'};
+      }
+    } catch (e) {
+      return {'success': false, 'error': e.toString()};
+    }
+  }
+
   Future<void> logout() async {
     try {
       final url = Uri.parse('$baseUrl/api/auth/logout');

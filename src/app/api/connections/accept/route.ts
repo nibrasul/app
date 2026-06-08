@@ -72,6 +72,8 @@ export async function POST(request: Request) {
       }),
     ]);
 
+    console.log(`[CONNECTION] Transaction complete. Connection accepted: ${connectionId} (Requester: ${connection.requesterId} ➔ Receiver: ${connection.receiverId})`);
+
     // Create default connection visibilities copying current global settings
     const requesterSocialIds = connection.requester.profile?.socials.map((s) => s.id) ?? [];
     const requesterSettings = connection.requester.sharingSettings;

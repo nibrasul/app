@@ -2,9 +2,17 @@ import { NextResponse } from 'next/server';
 import bcrypt from 'bcryptjs';
 import prisma from '@/lib/db';
 import { signJWT } from '@/lib/auth';
+import { ensureUserSetup } from '@/lib/user-setup';
+import { rateLimit } from '@/lib/rate-limit';
 
 export async function POST(request: Request) {
   try {
+    // Rate limiting: 10 login attempts per minute per IP
+    const ip = request.headers.get('x-forwarded-for') || '127.0.0.1';
+    if (!rateLimit(`login:${ip}`, 10, 60000)) {
+      return NextResponse.json({ error: 'Too many login attempts. Please try again later.' }, { status: 429 });
+    }
+
     const { email, password } = await request.json();
 
     if (!email || !password) {
@@ -19,6 +27,10 @@ export async function POST(request: Request) {
     if (!user || !(await bcrypt.compare(password, user.passwordHash))) {
       return NextResponse.json({ error: 'Invalid email or password.' }, { status: 401 });
     }
+
+    // Run user setup synchronously to guarantee profile readiness
+    console.log(`[AUTH] Synchronously verifying profile for logged-in user ID: ${user.id}`);
+    await ensureUserSetup(user.id, user.email, user.name);
 
     const token = await signJWT({ userId: user.id, email: user.email });
 
@@ -46,3 +58,4 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Something went wrong.' }, { status: 500 });
   }
 }
+

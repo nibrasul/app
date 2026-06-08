@@ -1,9 +1,18 @@
 import { NextResponse } from 'next/server';
 import bcrypt from 'bcryptjs';
 import prisma from '@/lib/db';
+import { signJWT } from '@/lib/auth';
+import { ensureUserSetup } from '@/lib/user-setup';
+import { rateLimit } from '@/lib/rate-limit';
 
 export async function POST(request: Request) {
   try {
+    // Rate limiting: 5 registrations per minute per IP
+    const ip = request.headers.get('x-forwarded-for') || '127.0.0.1';
+    if (!rateLimit(`register:${ip}`, 5, 60000)) {
+      return NextResponse.json({ error: 'Too many registration attempts. Please try again later.' }, { status: 429 });
+    }
+
     const { name, email, password, username: rawUsername } = await request.json();
 
     if (!name || !email || !password || !rawUsername) {
@@ -27,46 +36,44 @@ export async function POST(request: Request) {
 
     const passwordHash = await bcrypt.hash(password, 10);
 
-    await prisma.user.create({
+    // Create minimal user
+    const user = await prisma.user.create({
       data: {
         name,
         email,
-        passwordHash,
-        profile: {
-          create: {
-            name,
-            username,
-            tagline: "Let's connect!",
-            avatar: "/profile_avatar.png",
-            bio: "I design meaningful experiences.",
-            diamonds: "0",
-            isPremium: false,
-            tapCount: 0,
-            tags: {
-              createMany: {
-                data: [
-                  { text: 'Creator', type: 'role' },
-                  { text: 'Earth', type: 'location' }
-                ]
-              }
-            }
-          }
-        },
-        sharingSettings: {
-          create: {
-            shareName: true,
-            shareEmail: true,
-            sharePhone: false,
-            shareWhatsapp: true,
-            shareLocation: false
-          }
-        }
+        passwordHash
       }
     });
 
-    return NextResponse.json({ success: true, message: 'User registered successfully!' }, { status: 201 });
+    // Run user setup synchronously to guarantee profile readiness
+    console.log(`[AUTH] Synchronously provisioning profile for registered user ID: ${user.id}`);
+    await ensureUserSetup(user.id, user.email, user.name, username);
+
+    const token = await signJWT({ userId: user.id, email: user.email });
+
+    const response = NextResponse.json({
+      success: true,
+      message: 'User registered successfully!',
+      user: {
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        username
+      }
+    }, { status: 201 });
+
+    response.cookies.set('pertap_jwt', token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'strict',
+      maxAge: 7 * 24 * 60 * 60, // 7 days
+      path: '/'
+    });
+
+    return response;
   } catch (error: any) {
     console.error('Registration error:', error);
     return NextResponse.json({ error: 'Something went wrong.' }, { status: 500 });
   }
 }
+

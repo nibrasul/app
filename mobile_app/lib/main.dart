@@ -2,40 +2,40 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'services/api_service.dart';
 import 'services/deep_link_service.dart';
-import 'screens/auth_screen.dart';
+import 'screens/login_screen.dart';
 import 'screens/main_navigation_shell.dart';
 import 'screens/connect_screen.dart';
 import 'screens/connections_screen.dart';
-
+ 
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
-
+ 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-
+ 
   final apiService = ApiService();
   await apiService.init();
-
+ 
   runApp(const MyApp());
 }
-
+ 
 class MyApp extends StatefulWidget {
   const MyApp({Key? key}) : super(key: key);
-
+ 
   @override
   State<MyApp> createState() => _MyAppState();
 }
-
+ 
 class _MyAppState extends State<MyApp> {
   final ApiService _apiService = ApiService();
   bool _checkingAuth = true;
   bool _isAuthenticated = false;
-
+ 
   @override
   void initState() {
     super.initState();
     _checkInitialAuth();
   }
-
+ 
   Future<void> _checkInitialAuth() async {
     final user = await _apiService.getMe();
     setState(() {
@@ -47,7 +47,7 @@ class _MyAppState extends State<MyApp> {
       DeepLinkService().init(navigatorKey);
     });
   }
-
+ 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -95,7 +95,7 @@ class _MyAppState extends State<MyApp> {
                     });
                   },
                 )
-              : AuthScreen(
+              : LoginScreen(
                   onLoginSuccess: () {
                     setState(() {
                       _isAuthenticated = true;
