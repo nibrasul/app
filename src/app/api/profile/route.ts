@@ -3,7 +3,6 @@ import { cookies } from 'next/headers';
 import prisma from '@/lib/db';
 import { verifyJWT } from '@/lib/auth';
 import { calculateProfileScore } from '@/lib/score';
-import { ensureUserSetup } from '@/lib/user-setup';
 
 export async function GET(request: Request) {
   try {
@@ -16,12 +15,30 @@ export async function GET(request: Request) {
     if (userIdParam) {
       profile = await prisma.profile.findUnique({
         where: { userId: parseInt(userIdParam) },
-        include: { tags: true, socials: true }
+        include: {
+          tags: true,
+          socials: true,
+          user: {
+            select: {
+              profileReady: true,
+              sharingSettings: true
+            }
+          }
+        }
       });
     } else if (profileIdParam) {
       profile = await prisma.profile.findUnique({
         where: { id: parseInt(profileIdParam) },
-        include: { tags: true, socials: true }
+        include: {
+          tags: true,
+          socials: true,
+          user: {
+            select: {
+              profileReady: true,
+              sharingSettings: true
+            }
+          }
+        }
       });
     } else {
       const cookieStore = await cookies();
@@ -35,58 +52,58 @@ export async function GET(request: Request) {
       }
       profile = await prisma.profile.findUnique({
         where: { userId: payload.userId },
-        include: { tags: true, socials: true }
+        include: {
+          tags: true,
+          socials: true,
+          user: {
+            select: {
+              profileReady: true,
+              sharingSettings: true
+            }
+          }
+        }
       });
     }
 
     if (!profile) {
-      let recovered = false;
-      let targetUserId: number | null = null;
-
+      let userObj = null;
       if (userIdParam) {
-        targetUserId = parseInt(userIdParam);
+        userObj = await prisma.user.findUnique({ where: { id: parseInt(userIdParam) } });
       } else {
         const cookieStore = await cookies();
         const token = cookieStore.get('pertap_jwt')?.value;
         if (token) {
           const payload = await verifyJWT(token);
           if (payload) {
-            targetUserId = payload.userId;
+            userObj = await prisma.user.findUnique({ where: { id: payload.userId } });
           }
         }
       }
 
-      if (targetUserId) {
-        const user = await prisma.user.findUnique({ where: { id: targetUserId } });
-        if (user) {
-          console.warn(`[AUTH] Profile missing for user ID: ${targetUserId}. Auto-provisioning via ensureUserSetup fallback.`);
-          const tempProfile = await ensureUserSetup(user.id, user.email, user.name);
-          profile = await prisma.profile.findUnique({
-            where: { id: tempProfile.id },
-            include: { tags: true, socials: true }
-          });
-          recovered = true;
-        }
-      }
-
-      if (!profile) {
-        // Return a safe fallback placeholder profile so the page never crashes with 404
+      if (userObj) {
+        console.warn(`[PROFILE] Profile record not found for user ${userObj.id}. Returning safe placeholder.`);
         return NextResponse.json({
           success: true,
           profile: {
             id: 0,
-            userId: 0,
-            name: "Tapfolio Explorer",
-            username: "guest",
+            userId: userObj.id,
+            name: userObj.name,
+            username: userObj.email.split('@')[0].toLowerCase().replace(/[^a-z0-9_-]/g, ''),
             tagline: "Let's connect!",
-            avatar: "/profile_avatar.png",
-            isOnline: false,
-            bio: "Tapfolio member.",
-            diamonds: "0",
+            avatar: '/profile_avatar.png',
+            bio: "Initializing profile...",
+            phone: null,
+            whatsapp: null,
+            location: null,
+            diamonds: '0',
             isPremium: false,
             tapCount: 0,
             tags: [],
-            socials: []
+            socials: [],
+            user: {
+              profileReady: userObj.profileReady,
+              sharingSettings: null
+            }
           },
           score: 0,
           items: [],
@@ -95,6 +112,9 @@ export async function GET(request: Request) {
           connectionId: null
         });
       }
+
+      console.warn(`[PROFILE] Profile lookup failed: profile and user not found.`);
+      return NextResponse.json({ error: 'Profile not found.' }, { status: 404 });
     }
 
     const scoreData = calculateProfileScore(profile);
@@ -192,7 +212,13 @@ export async function PUT(request: Request) {
       },
       include: {
         tags: true,
-        socials: true
+        socials: true,
+        user: {
+          select: {
+            profileReady: true,
+            sharingSettings: true
+          }
+        }
       }
     });
 
@@ -205,7 +231,13 @@ export async function PUT(request: Request) {
       },
       include: {
         tags: true,
-        socials: true
+        socials: true,
+        user: {
+          select: {
+            profileReady: true,
+            sharingSettings: true
+          }
+        }
       }
     });
 

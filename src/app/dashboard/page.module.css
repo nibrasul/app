@@ -614,3 +614,229 @@
     padding: 1.5rem;
   }
 }
+
+.completionCard {
+  margin-bottom: 2rem;
+  padding: 2rem;
+}
+
+.completionHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.25rem;
+}
+
+.completionTitle {
+  font-size: 1.4rem;
+  font-weight: 800;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.completionSubtitle {
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  margin-top: 0.25rem;
+}
+
+.completionBadge {
+  font-size: 0.95rem;
+  font-weight: 700;
+  background: rgba(99, 102, 241, 0.2);
+  border: 1px solid var(--accent-glow);
+  padding: 0.4rem 1rem;
+  border-radius: var(--radius-full);
+  color: #a5b4fc;
+}
+
+.completionProgressBarBg {
+  width: 100%;
+  height: 8px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: var(--radius-full);
+  overflow: hidden;
+  margin-bottom: 1.5rem;
+}
+
+.completionProgressBarFill {
+  height: 100%;
+  background: var(--gradient-premium);
+  border-radius: var(--radius-full);
+  transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.completionChecklist {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1.25rem;
+}
+
+.completionCheckItem {
+  display: flex;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  background: rgba(255, 255, 255, 0.01);
+  border: 1px solid rgba(255, 255, 255, 0.03);
+  border-radius: var(--radius-sm);
+  align-items: flex-start;
+}
+
+.completionCheckStatus {
+  flex-shrink: 0;
+  margin-top: 0.15rem;
+}
+
+.completionCheckDone {
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: rgba(16, 185, 129, 0.15);
+  border: 1px solid var(--accent-success);
+  color: var(--accent-success);
+  font-size: 0.75rem;
+  font-weight: bold;
+}
+
+.completionCheckPending {
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  border: 1.5px solid var(--text-muted);
+  color: var(--text-muted);
+  font-size: 0.8rem;
+}
+
+.completionCheckDetails strong {
+  font-size: 0.85rem;
+  color: var(--text-primary);
+  display: block;
+}
+
+.completionCheckDetails p {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  margin-top: 0.15rem;
+  line-height: 1.2;
+}
+
+.emptyWelcomeState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 1.5rem 1rem;
+  gap: 1rem;
+}
+
+.emptyIcon {
+  font-size: 2.5rem;
+}
+
+.welcomeShareBox {
+  display: flex;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: var(--radius-sm);
+  background: rgba(255, 255, 255, 0.02);
+  overflow: hidden;
+  width: 100%;
+  margin-top: 0.5rem;
+}
+
+.welcomeGuideLinks {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+  width: 100%;
+}
+
+.welcomeGuideLinks p {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  font-weight: 600;
+  margin-bottom: 0.25rem;
+}
+
+.guideLink {
+  font-size: 0.9rem;
+  color: var(--accent-glow);
+  font-weight: 600;
+  padding: 0.5rem;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: var(--radius-sm);
+  transition: all var(--transition-fast);
+  text-decoration: none;
+  text-align: center;
+}
+
+.guideLink:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: var(--accent-glow);
+}
+
+.recentLogsList {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.logItem {
+  display: flex;
+  gap: 0.75rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  align-items: flex-start;
+}
+
+.logItem:last-child {
+  border-bottom: none;
+}
+
+.logIcon {
+  font-size: 1.2rem;
+  flex-shrink: 0;
+  margin-top: 0.1rem;
+}
+
+.logInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.logInfo strong {
+  font-size: 0.9rem;
+  color: var(--text-primary);
+}
+
+.logInfo p {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+}
+
+.logTime {
+  font-size: 0.7rem;
+  color: var(--text-muted);
+}
+
+.viewAllLogs {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--accent-glow);
+  text-align: center;
+  margin-top: 0.5rem;
+  transition: opacity var(--transition-fast);
+  text-decoration: none;
+}
+
+.viewAllLogs:hover {
+  text-decoration: underline;
+}

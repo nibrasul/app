@@ -25,12 +25,18 @@ export async function POST(request: Request) {
     });
 
     if (!user || !(await bcrypt.compare(password, user.passwordHash))) {
+      console.warn(`[AUTH] Failed login attempt for email=${email}: invalid credentials`);
       return NextResponse.json({ error: 'Invalid email or password.' }, { status: 401 });
     }
 
-    // Run user setup synchronously to guarantee profile readiness
-    console.log(`[AUTH] Synchronously verifying profile for logged-in user ID: ${user.id}`);
-    await ensureUserSetup(user.id, user.email, user.name);
+    // Run user setup synchronously to guarantee profile readiness before redirection
+    try {
+      await ensureUserSetup(user.id, user.email, user.name);
+    } catch (err) {
+      console.error(`[AUTH] Synchronous ensureUserSetup failed for user ${user.id} on login:`, err);
+    }
+
+    console.log(`[AUTH] Successful login for email=${email}, userId=${user.id}`);
 
     const token = await signJWT({ userId: user.id, email: user.email });
 

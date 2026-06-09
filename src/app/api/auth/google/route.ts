@@ -33,6 +33,7 @@ export async function POST(request: Request) {
     }
 
     if (!email) {
+      console.warn(`[AUTH] Google authentication failed: email payload missing in token`);
       return NextResponse.json({ error: 'Invalid Google authentication payload.' }, { status: 400 });
     }
 
@@ -57,11 +58,17 @@ export async function POST(request: Request) {
         },
         include: { profile: true }
       });
+      console.log(`[AUTH] Created new user account via Google Sign-In: email=${email}, userId=${user.id}`);
     }
 
-    // Run user setup synchronously to guarantee profile readiness
-    console.log(`[AUTH] Synchronously verifying profile for Google user ID: ${user!.id}`);
-    await ensureUserSetup(user!.id, user!.email, user!.name);
+    // Run user setup synchronously to guarantee profile readiness before redirection
+    try {
+      await ensureUserSetup(user!.id, user!.email, user!.name);
+    } catch (err) {
+      console.error(`[AUTH] Synchronous ensureUserSetup failed for user ${user!.id} on Google Auth:`, err);
+    }
+
+    console.log(`[AUTH] Google Auth login success for email=${email}, userId=${user.id}`);
 
     const token = await signJWT({ userId: user.id, email: user.email });
 

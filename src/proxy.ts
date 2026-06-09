@@ -6,6 +6,17 @@ export async function proxy(request: NextRequest) {
   const token = request.cookies.get('pertap_jwt')?.value;
   const { pathname } = request.nextUrl;
 
+  // 1. Handle dynamic /@username path rewriting
+  if (pathname.startsWith('/@')) {
+    const username = pathname.substring(2); // Remove /@
+    if (username) {
+      const rewriteUrl = request.nextUrl.clone();
+      rewriteUrl.pathname = `/connect/${username}`;
+      return NextResponse.rewrite(rewriteUrl);
+    }
+  }
+
+  // 2. Handle protected routes redirects
   const isAuthRoute = pathname.startsWith('/login');
   const isProtectedRoute = pathname.startsWith('/dashboard') || pathname.startsWith('/history') || pathname.startsWith('/leaderboard');
 
@@ -23,6 +34,7 @@ export async function proxy(request: NextRequest) {
     }
   }
 
+  // 3. Handle auth routes redirects if already logged in
   if (isAuthRoute && token) {
     const payload = await verifyJWT(token);
     if (payload) {
@@ -34,5 +46,11 @@ export async function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/dashboard/:path*', '/history/:path*', '/leaderboard/:path*', '/login'],
+  matcher: [
+    '/dashboard/:path*', 
+    '/history/:path*', 
+    '/leaderboard/:path*', 
+    '/login', 
+    '/@:path*'
+  ],
 };

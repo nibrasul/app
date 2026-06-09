@@ -15,23 +15,29 @@ export async function POST(request: Request) {
 
     const { name, email, password, username: rawUsername } = await request.json();
 
-    if (!name || !email || !password || !rawUsername) {
-      return NextResponse.json({ error: 'Name, email, password, and username are required.' }, { status: 400 });
+    if (!name || !email || !password) {
+      return NextResponse.json({ error: 'Name, email, and password are required.' }, { status: 400 });
     }
 
-    const username = rawUsername.toLowerCase().trim();
-    if (!/^[a-z0-9_-]{3,20}$/.test(username)) {
-      return NextResponse.json({ error: 'Username must be 3-20 characters long and contain only lowercase letters, numbers, hyphens, or underscores.' }, { status: 400 });
+    let username: string | undefined = undefined;
+    if (rawUsername) {
+      const cleanUsername = rawUsername.toLowerCase().trim();
+      if (!/^[a-z0-9_-]{3,20}$/.test(cleanUsername)) {
+        return NextResponse.json({ error: 'Username must be 3-20 characters long and contain only lowercase letters, numbers, hyphens, or underscores.' }, { status: 400 });
+      }
+
+      const existingProfile = await prisma.profile.findUnique({ where: { username: cleanUsername } });
+      if (existingProfile) {
+        console.warn(`[AUTH] Registration failed for email=${email}: username @${cleanUsername} is already taken`);
+        return NextResponse.json({ error: 'Username is already taken.' }, { status: 400 });
+      }
+      username = cleanUsername;
     }
 
     const existingUser = await prisma.user.findUnique({ where: { email } });
     if (existingUser) {
+      console.warn(`[AUTH] Registration failed for email=${email}: user already exists`);
       return NextResponse.json({ error: 'User with this email already exists.' }, { status: 400 });
-    }
-
-    const existingProfile = await prisma.profile.findUnique({ where: { username } });
-    if (existingProfile) {
-      return NextResponse.json({ error: 'Username is already taken.' }, { status: 400 });
     }
 
     const passwordHash = await bcrypt.hash(password, 10);
@@ -45,9 +51,16 @@ export async function POST(request: Request) {
       }
     });
 
-    // Run user setup synchronously to guarantee profile readiness
-    console.log(`[AUTH] Synchronously provisioning profile for registered user ID: ${user.id}`);
-    await ensureUserSetup(user.id, user.email, user.name, username);
+    // Run user setup synchronously to guarantee profile readiness before redirection
+    let profile = null;
+    try {
+      profile = await ensureUserSetup(user.id, user.email, user.name, username);
+    } catch (err) {
+      console.error(`[AUTH] Synchronous ensureUserSetup failed for user ${user.id} during registration:`, err);
+    }
+
+    const finalUsername = profile ? profile.username : (username || email.split('@')[0].toLowerCase().replace(/[^a-z0-9_-]/g, ''));
+    console.log(`[AUTH] Successfully registered new user: email=${email}, userId=${user.id}, username=@${finalUsername}`);
 
     const token = await signJWT({ userId: user.id, email: user.email });
 
@@ -58,7 +71,7 @@ export async function POST(request: Request) {
         id: user.id,
         name: user.name,
         email: user.email,
-        username
+        username: finalUsername
       }
     }, { status: 201 });
 

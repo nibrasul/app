@@ -2,14 +2,22 @@ import prisma from './db';
 
 /**
  * Idempotent, transaction-locked helper to ensure a user has an initialized Profile and SharingSettings.
- * Catches database unique constraint errors (Prisma P2002) and retries to prevent concurrent registration race conditions.
+ * This function handles username generation with safe conflict resolution (no infinite loop risk)
+ * and database-level unique constraint collision retries by wrapping the interactive transaction
+ * in a retry loop from the outside.
  */
 export async function ensureUserSetup(userId: number, email: string, name: string, customUsername?: string) {
-  let attempts = 0;
-  const maxAttempts = 10;
+  console.log(`[AUTH] Initializing setup check for userId=${userId}, email=${email}`);
 
-  while (attempts < maxAttempts) {
-    attempts++;
+  let base = (customUsername || email.split('@')[0])
+    .toLowerCase()
+    .replace(/[^a-z0-9_-]/g, ''); // Keep alphanumeric, hyphen, underscore matching schema
+  if (!base || base.length < 3) base = 'user';
+
+  let currentUsername = base;
+  let retries = 0;
+
+  while (retries < 5) {
     try {
       return await prisma.$transaction(async (tx) => {
         // 1. Check if already exists (FAST EXIT)
@@ -18,45 +26,63 @@ export async function ensureUserSetup(userId: number, email: string, name: strin
         });
 
         if (existingProfile) {
+          console.log(`[AUTH] Profile already exists for userId=${userId}. Fast-exiting.`);
+          
+          // Also ensure sharing settings exist just in case
           const existingSettings = await tx.sharingSettings.findUnique({
             where: { userId }
           });
           if (!existingSettings) {
+            console.log(`[AUTH] SharingSettings missing for existing userId=${userId}. Restoring.`);
             await tx.sharingSettings.create({
               data: { userId }
             });
           }
+
+          // Ensure User.profileReady flag is true
+          const existingUser = await tx.user.findUnique({
+            where: { id: userId }
+          });
+          if (existingUser && !existingUser.profileReady) {
+            console.log(`[AUTH] Updating profileReady flag to true for existing userId=${userId}`);
+            await tx.user.update({
+              where: { id: userId },
+              data: { profileReady: true }
+            });
+          }
+
           return existingProfile;
         }
 
-        // 2. Username generation
-        let base = (customUsername || email.split('@')[0])
-          .toLowerCase()
-          .replace(/[^a-z0-9_-]/g, ''); // Keep alphanumeric, hyphen, underscore
-        if (!base || base.length < 3) base = 'user';
+        // 2. Username check
+        // Check if current username is taken
+        const isTaken = await tx.profile.findUnique({
+          where: { username: currentUsername }
+        });
 
-        let username = base;
-        if (attempts > 1) {
-          // Append random suffix if previous attempts collided
-          username = `${base}${Math.floor(Math.random() * 900) + 100}`;
-        }
-
-        let counter = 1;
-        while (await tx.profile.findUnique({ where: { username } })) {
-          username = `${base}${counter++}`;
-          if (counter > 9999) {
-            username = `${base}_${Date.now()}`;
-            break;
+        if (isTaken) {
+          if (retries === 0 && customUsername) {
+            // custom username taken, generate suggestions
+            let counter = 1;
+            currentUsername = `${base}${counter}`;
+            while (await tx.profile.findUnique({ where: { username: currentUsername } })) {
+              currentUsername = `${base}${counter++}`;
+              if (counter > 999) {
+                currentUsername = `${base}_${Date.now()}`;
+                break;
+              }
+            }
+          } else {
+            currentUsername = `${base}${Math.floor(Math.random() * 9000) + 1000}`;
           }
+          console.log(`[AUTH] Username target in-transaction occupied. Adjusting target to @${currentUsername}`);
         }
-
-        console.log(`[AUTH] Attempting profile creation (Attempt ${attempts}/${maxAttempts}) for userId: ${userId}, username: ${username}`);
 
         // 3. Create profile
         const profile = await tx.profile.create({
           data: {
             userId,
-            username,
+            username: currentUsername,
             name: name || base,
             bio: "I design meaningful experiences.",
             tagline: "Let's connect!",
@@ -74,31 +100,36 @@ export async function ensureUserSetup(userId: number, email: string, name: strin
             }
           }
         });
+        console.log(`[AUTH] Profile successfully created for userId=${userId} with username=@${currentUsername}`);
 
         // 4. Create settings
         await tx.sharingSettings.create({
           data: { userId }
         });
+        console.log(`[AUTH] SharingSettings successfully created for userId=${userId}`);
 
-        console.log(`[AUTH] Successfully created profile and sharing settings for userId: ${userId}, username: ${username}`);
+        // 5. Update user's profileReady flag
+        await tx.user.update({
+          where: { id: userId },
+          data: { profileReady: true }
+        });
+        console.log(`[AUTH] User profileReady set to true for userId=${userId}`);
+
         return profile;
       });
-    } catch (error: any) {
-      // Prisma Unique Constraint violation error code is 'P2002'
-      const isUniqueConstraintViolation = 
-        error.code === 'P2002' || 
-        error.message?.includes('Unique constraint') || 
-        error.message?.includes('unique constraint');
-
-      if (isUniqueConstraintViolation && attempts < maxAttempts) {
-        console.warn(`[AUTH] Concurrency collision or duplicate key race detected on attempt ${attempts}. Retrying...`, error);
-        continue;
+    } catch (err: any) {
+      // P2002 is Prisma's code for unique constraint violation
+      const isUniqueError = err.code === 'P2002' || (err.message && err.message.includes('Unique constraint failed'));
+      if (isUniqueError && retries < 4) {
+        retries++;
+        console.warn(`[AUTH] Database unique collision on username=@${currentUsername} (or userId). Retrying transaction setup (attempt ${retries + 1}/5)...`);
+        currentUsername = `${base}${Math.floor(Math.random() * 9000) + 1000}`;
+      } else {
+        console.error(`[AUTH] Failed profile setup for userId=${userId}:`, err);
+        throw err;
       }
-      
-      console.error(`[AUTH_ERROR] ensureUserSetup failed at attempt ${attempts} with non-retryable error:`, error);
-      throw error;
     }
   }
 
-  throw new Error(`ensureUserSetup failed after ${maxAttempts} attempts due to persistent unique constraint collisions.`);
+  throw new Error(`[AUTH] Failed to create profile for userId=${userId} after maximum unique constraint retries.`);
 }

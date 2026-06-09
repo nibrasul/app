@@ -309,7 +309,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                 'Sign in to continue your connections',
                                 style: GoogleFonts.outfit(
                                   fontSize: 13,
-                                  color: Colors.white50,
+                                  color: Colors.white54,
                                 ),
                               ),
                               const SizedBox(height: 24),
@@ -410,7 +410,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                       suffixIcon: IconButton(
                                         icon: Icon(
                                           _obscurePassword ? Icons.visibility_off_outlined : Icons.visibility_outlined,
-                                          color: Colors.white50,
+                                          color: Colors.white54,
                                           size: 20,
                                         ),
                                         onPressed: () {
@@ -478,7 +478,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                   },
                                   child: RichText(
                                     text: TextSpan(
-                                      style: GoogleFonts.outfit(color: Colors.white50, fontSize: 13),
+                                      style: GoogleFonts.outfit(color: Colors.white54, fontSize: 13),
                                       children: [
                                         const TextSpan(text: 'New to Tapfolio? '),
                                         TextSpan(

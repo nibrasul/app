@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import Link from 'next/link';
 import Header from '@/components/Header';
 import styles from './page.module.css';
 
@@ -23,6 +24,7 @@ interface Profile {
   id: number;
   userId: number;
   name: string;
+  username: string;
   tagline: string;
   avatar: string;
   isOnline: boolean;
@@ -32,6 +34,16 @@ interface Profile {
   tapCount: number;
   tags: Tag[];
   socials: SocialLink[];
+  user?: {
+    profileReady: boolean;
+    sharingSettings: {
+      shareName: boolean;
+      shareEmail: boolean;
+      sharePhone: boolean;
+      shareWhatsapp: boolean;
+      shareLocation: boolean;
+    } | null;
+  };
 }
 
 interface ChecklistItem {
@@ -44,6 +56,7 @@ interface ChecklistItem {
 
 export default function Dashboard() {
   const [profile, setProfile] = useState<Profile | null>(null);
+  const [historyEvents, setHistoryEvents] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
@@ -99,8 +112,23 @@ export default function Dashboard() {
     }
   };
 
+  const fetchHistory = async () => {
+    try {
+      const res = await fetch('/api/history');
+      if (res.ok) {
+        const data = await res.json();
+        if (data.success) {
+          setHistoryEvents(data.events || []);
+        }
+      }
+    } catch (err) {
+      console.error('Failed to fetch history logs:', err);
+    }
+  };
+
   useEffect(() => {
     fetchProfile();
+    fetchHistory();
   }, []);
 
   const handleAvatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -253,8 +281,44 @@ export default function Dashboard() {
     );
   }
 
-  const slugify = (text: string) => text.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
-  const publicLink = profile ? `${window.location.origin}/${slugify(profile.name)}` : '';
+  const publicLink = profile ? `${window.location.origin}/@${profile.username}` : '';
+
+  const calculateProgress = () => {
+    let pct = 40;
+    const checklistItems = [
+      { id: 'signup', label: 'Create Account', completed: true, value: 40, desc: 'Sign up with name & email' },
+      { id: 'username', label: 'Customize Username', completed: false, value: 15, desc: 'Set a custom username link' },
+      { id: 'photo_headline', label: 'Photo & Headline', completed: false, value: 15, desc: 'Upload an avatar and set tagline' },
+      { id: 'sharing', label: 'Sharing Preferences', completed: false, value: 15, desc: 'Set your contact sharing settings' },
+      { id: 'socials', label: 'Add Social Link', completed: false, value: 15, desc: 'Add at least one social profile' },
+    ];
+
+    if (profile?.user?.profileReady) {
+      checklistItems[1].completed = true;
+      pct += 15;
+    }
+
+    const hasCustomAvatar = profile?.avatar && profile.avatar !== '/profile_avatar.png' && !profile.avatar.includes('profile_avatar.png');
+    const hasCustomTagline = profile?.tagline && profile.tagline.trim().length > 0 && profile.tagline !== "Let's connect!";
+    if (hasCustomAvatar && hasCustomTagline) {
+      checklistItems[2].completed = true;
+      pct += 15;
+    }
+
+    if (profile?.user?.sharingSettings) {
+      checklistItems[3].completed = true;
+      pct += 15;
+    }
+
+    if (profile?.socials && profile.socials.length >= 1) {
+      checklistItems[4].completed = true;
+      pct += 15;
+    }
+
+    return { percentage: pct, items: checklistItems };
+  };
+
+  const progressData = calculateProgress();
 
   return (
     <div className={styles.wrapper}>
@@ -262,6 +326,46 @@ export default function Dashboard() {
       <main className={styles.main}>
         {success && <div className={styles.toastSuccess}>{success}</div>}
         {error && <div className={styles.toastError}>{error}</div>}
+
+        {/* PROFILE COMPLETION CARD */}
+        {profile && (
+          <div className={`${styles.completionCard} glass-panel`}>
+            <div className={styles.completionHeader}>
+              <div>
+                <h2 className={styles.completionTitle}>Profile Setup Progress</h2>
+                <p className={styles.completionSubtitle}>Complete these steps to maximize your networking potential</p>
+              </div>
+              <div className={styles.completionBadge}>
+                {progressData.percentage}% Complete
+              </div>
+            </div>
+            
+            <div className={styles.completionProgressBarBg}>
+              <div 
+                className={styles.completionProgressBarFill} 
+                style={{ width: `${progressData.percentage}%` }}
+              />
+            </div>
+
+            <div className={styles.completionChecklist}>
+              {progressData.items.map((item) => (
+                <div key={item.id} className={styles.completionCheckItem}>
+                  <div className={styles.completionCheckStatus}>
+                    {item.completed ? (
+                      <span className={styles.completionCheckDone}>✓</span>
+                    ) : (
+                      <span className={styles.completionCheckPending}>○</span>
+                    )}
+                  </div>
+                  <div className={styles.completionCheckDetails}>
+                    <strong>{item.label}</strong>
+                    <p>{item.desc}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
 
         <div className={styles.dashboardGrid}>
           {/* LEFT: EDITING PROFILE CARD */}
@@ -375,6 +479,60 @@ export default function Dashboard() {
                   </div>
                 ))}
               </div>
+            </div>
+
+          {/* RECENT ACTIVITY / EMPTY STATE CARD */}
+          <div className={`${styles.card} glass-panel`}>
+              <h2 className={styles.sectionTitle}>Recent Activity</h2>
+              {historyEvents.length === 0 ? (
+                <div className={styles.emptyWelcomeState}>
+                  <div className={styles.emptyIcon}>👋</div>
+                  <h3>Welcome to Tapfolio!</h3>
+                  <p>Your profile is live and ready to share.</p>
+                  
+                  <div className={styles.welcomeShareBox}>
+                    <input readOnly value={publicLink} className={styles.shareInput} />
+                    <button
+                      onClick={() => {
+                        navigator.clipboard.writeText(publicLink);
+                        setSuccess('Link copied to clipboard!');
+                        setTimeout(() => setSuccess(''), 3000);
+                      }}
+                      className={styles.copyBtn}
+                    >
+                      Copy Link
+                    </button>
+                  </div>
+                  
+                  <div className={styles.welcomeGuideLinks}>
+                    <p>Start networking:</p>
+                    <a href={publicLink} target="_blank" className={styles.guideLink}>
+                      👀 View Your Profile
+                    </a>
+                    <Link href="/connections" className={styles.guideLink}>
+                      👥 Manage Connections
+                    </Link>
+                  </div>
+                </div>
+              ) : (
+                <div className={styles.recentLogsList}>
+                  {historyEvents.slice(0, 5).map((event) => (
+                    <div key={event.id} className={styles.logItem}>
+                      <span className={styles.logIcon}>{event.icon || '🔗'}</span>
+                      <div className={styles.logInfo}>
+                        <strong>{event.action}</strong>
+                        <p>{event.details}</p>
+                        <span className={styles.logTime}>
+                          {new Date(event.createdAt).toLocaleDateString()}
+                        </span>
+                      </div>
+                    </div>
+                  ))}
+                  <Link href="/history" className={styles.viewAllLogs}>
+                    View All Activity History →
+                  </Link>
+                </div>
+              )}
             </div>
           </div>
 

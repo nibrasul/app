@@ -19,39 +19,39 @@ export default function RegisterPage() {
   const router = useRouter();
 
   // Step state
-  const [step, setStep] = useState<1 | 2 | 3 | 4 | 5>(1);
+  const [step, setStep] = useState<1 | 2 | 3 | 4 | 5 | 6 | 7>(1);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
 
-  // Step 1: Basic Identity
+  // Step 2: Account Creation
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [username, setUsername] = useState('');
   const [showPassword, setShowPassword] = useState(false);
 
-  // Username validation states
+  // Step 4: Username Customization
+  const [username, setUsername] = useState('');
   const [usernameChecking, setUsernameChecking] = useState(false);
   const [usernameAvailable, setUsernameAvailable] = useState<boolean | null>(null);
   const [usernameSuggestions, setUsernameSuggestions] = useState<string[]>([]);
   const [usernameError, setUsernameError] = useState('');
 
-  // Step 2: Profile Onboarding Setup
+  // Step 5: Profile Essentials
   const [tagline, setTagline] = useState('');
   const [bio, setBio] = useState('');
   const [avatar, setAvatar] = useState('/profile_avatar.png');
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
   const [selectedPresetIndex, setSelectedPresetIndex] = useState<number | null>(null);
 
-  // Step 3: Default Sharing Preferences
+  // Step 6: Sharing Preferences
   const [shareName, setShareName] = useState(true);
   const [shareEmail, setShareEmail] = useState(true);
   const [sharePhone, setSharePhone] = useState(false);
   const [shareWhatsapp, setShareWhatsapp] = useState(true);
   const [shareLocation, setShareLocation] = useState(false);
 
-  // Step 4: Social Links Setup
+  // Step 7: Social Handles
   const [github, setGithub] = useState('');
   const [linkedin, setLinkedin] = useState('');
   const [instagram, setInstagram] = useState('');
@@ -95,7 +95,7 @@ export default function RegisterPage() {
     }
 
     const cleanUsername = username.trim().toLowerCase();
-    if (!cleanUsername) {
+    if (!cleanUsername || step !== 4) {
       setUsernameAvailable(null);
       setUsernameSuggestions([]);
       setUsernameError('');
@@ -128,37 +128,25 @@ export default function RegisterPage() {
       } finally {
         setUsernameChecking(false);
       }
-    }, 500);
+    }, 400);
 
     return () => {
       if (checkTimeoutRef.current) clearTimeout(checkTimeoutRef.current);
     };
-  }, [username]);
+  }, [username, step]);
 
-  // Handle Intent Redirect Resolution
+  // Resolve dashboard redirect
   const resolveRedirect = () => {
-    let targetRedirect = '/dashboard';
-    
-    // Check URL redirect or intents in local storage
-    const sessionIntent = sessionStorage.getItem('pendingIntent');
-    const localIntent = localStorage.getItem('pendingIntent');
-    const intentVal = sessionIntent || localIntent;
-    
-    if (intentVal && intentVal.startsWith('connect:')) {
-      const targetUser = intentVal.split(':')[1];
-      targetRedirect = `/connect/${targetUser}`;
-    }
-
-    // Clean up intent storage
+    // Clean up redirect state
     sessionStorage.removeItem('pendingIntent');
     localStorage.removeItem('pendingIntent');
     sessionStorage.removeItem('auth_intent');
 
-    router.push(targetRedirect);
+    router.push('/dashboard');
     router.refresh();
   };
 
-  // Google Sign-up Trigger
+  // Google Sign-up flow
   const handleGoogleSignup = async () => {
     setLoading(true);
     setError('');
@@ -186,10 +174,9 @@ export default function RegisterPage() {
       setEmail(`google.test.${randomSuffix}@tapfolio.me`);
       setUsername(data.user.username);
       
-      // Auto-advance to step 2 onboarding since they are registered & logged in!
-      setSuccess('Account created with Google!');
+      setSuccess('Registered successfully with Google!');
       setTimeout(() => {
-        setStep(2);
+        setStep(3); // Advance directly to Success Moment
         setSuccess('');
         setLoading(false);
       }, 800);
@@ -199,13 +186,9 @@ export default function RegisterPage() {
     }
   };
 
-  // Step 1 Form Handler
-  const handleStep1Submit = async (e: React.FormEvent) => {
+  // Step 2 Form Handler (Create account only, username is auto-generated)
+  const handleStep2Submit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!usernameAvailable) {
-      setError('Please choose an available username.');
-      return;
-    }
     setLoading(true);
     setError('');
 
@@ -214,7 +197,7 @@ export default function RegisterPage() {
       const regRes = await fetch('/api/auth/register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, email, password, username }),
+        body: JSON.stringify({ name, email, password }),
       });
       const regData = await regRes.json();
 
@@ -222,7 +205,7 @@ export default function RegisterPage() {
         throw new Error(regData.error || 'Registration failed');
       }
 
-      // Login to obtain cookie session
+      // 2. Login to obtain cookie session
       const logRes = await fetch('/api/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -233,9 +216,37 @@ export default function RegisterPage() {
         throw new Error('Registration complete, but login failed. Please sign in manually.');
       }
 
-      setStep(2);
+      // Preset the auto-generated username for customization
+      setUsername(regData.user.username);
+      setStep(3); // Go directly to First Success Moment!
     } catch (err: any) {
       setError(err.message || 'Something went wrong. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Step 4: Username Customization
+  const handleStep4Submit = async () => {
+    if (usernameAvailable === false) {
+      setError('Please select a unique username or skip to keep the generated handle.');
+      return;
+    }
+    setLoading(true);
+    setError('');
+
+    try {
+      const res = await fetch('/api/profile/onboarding', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Failed to update username.');
+
+      setStep(5);
+    } catch (err: any) {
+      setError(err.message || 'Error saving username.');
     } finally {
       setLoading(false);
     }
@@ -272,58 +283,49 @@ export default function RegisterPage() {
     }
   };
 
-  // Preset Avatar Selection (mock presets inside app as data URIs or colors)
+  // Preset Avatar Selection
   const handleSelectPreset = (index: number) => {
     setSelectedPresetIndex(index);
-    // Dynamic generated avatar colored gradient
-    const gradients = [
-      'linear-gradient(135deg, #f59e0b 0%, #ef4444 100%)',
-      'linear-gradient(135deg, #10b981 0%, #3b82f6 100%)',
-      'linear-gradient(135deg, #6366f1 0%, #a855f7 100%)',
-      'linear-gradient(135deg, #ec4899 0%, #f43f5e 100%)',
-      'linear-gradient(135deg, #06b6d4 0%, #0891b2 100%)',
-      'linear-gradient(135deg, #84cc16 0%, #10b981 100%)',
-    ];
-    // Create base64 inline svg of a colored gradient placeholder
-    const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><defs><linearGradient id="g${index}" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="${index === 0 ? '#f59e0b' : index === 1 ? '#10b981' : index === 2 ? '#6366f1' : index === 3 ? '#ec4899' : index === 4 ? '#06b6d4' : '#84cc16'}" /><stop offset="100%" stop-color="${index === 0 ? '#ef4444' : index === 1 ? '#3b82f6' : index === 2 ? '#a855f7' : index === 3 ? '#f43f5e' : index === 4 ? '#0891b2' : '#10b981'}" /></linearGradient></defs><rect width="100" height="100" fill="url(#g${index})" /><text x="50%" y="60%" font-size="40" font-family="Outfit, sans-serif" font-weight="bold" fill="white" text-anchor="middle">${name.slice(0,1).toUpperCase()}</text></svg>`;
+    const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><defs><linearGradient id="g${index}" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="${index === 1 ? '#f59e0b' : index === 2 ? '#10b981' : index === 3 ? '#6366f1' : index === 4 ? '#ec4899' : index === 5 ? '#06b6d4' : '#84cc16'}" /><stop offset="100%" stop-color="${index === 1 ? '#ef4444' : index === 2 ? '#3b82f6' : index === 3 ? '#a855f7' : index === 4 ? '#f43f5e' : index === 5 ? '#0891b2' : '#10b981'}" /></linearGradient></defs><rect width="100" height="100" fill="url(#g${index})" /><text x="50%" y="60%" font-size="40" font-family="Outfit, sans-serif" font-weight="bold" fill="white" text-anchor="middle">${name.slice(0,1).toUpperCase() || 'T'}</text></svg>`;
     const dataUrl = `data:image/svg+xml;utf8,${encodeURIComponent(svg)}`;
     setAvatar(dataUrl);
   };
 
-  // Final Step 5 Submission: Atomic onboarding save
-  const handleFinalSubmit = async () => {
+  // Final step social submission
+  const handleFinalSubmit = async (skip = false) => {
     setLoading(true);
     setError('');
 
-    // Construct social link list payload
     const socialsList = [];
-    if (github) {
-      socialsList.push({
-        platform: 'GitHub',
-        handle: github,
-        url: github.startsWith('http') ? github : `https://github.com/${github}`,
-      });
-    }
-    if (linkedin) {
-      socialsList.push({
-        platform: 'LinkedIn',
-        handle: linkedin,
-        url: linkedin.startsWith('http') ? linkedin : `https://linkedin.com/in/${linkedin}`,
-      });
-    }
-    if (instagram) {
-      socialsList.push({
-        platform: 'Instagram',
-        handle: instagram,
-        url: instagram.startsWith('http') ? instagram : `https://instagram.com/${instagram}`,
-      });
-    }
-    if (portfolio) {
-      socialsList.push({
-        platform: 'Portfolio',
-        handle: 'Website',
-        url: portfolio.startsWith('http') ? portfolio : `https://${portfolio}`,
-      });
+    if (!skip) {
+      if (github) {
+        socialsList.push({
+          platform: 'GitHub',
+          handle: github,
+          url: github.startsWith('http') ? github : `https://github.com/${github}`,
+        });
+      }
+      if (linkedin) {
+        socialsList.push({
+          platform: 'LinkedIn',
+          handle: linkedin,
+          url: linkedin.startsWith('http') ? linkedin : `https://linkedin.com/in/${linkedin}`,
+        });
+      }
+      if (instagram) {
+        socialsList.push({
+          platform: 'Instagram',
+          handle: instagram,
+          url: instagram.startsWith('http') ? instagram : `https://instagram.com/${instagram}`,
+        });
+      }
+      if (portfolio) {
+        socialsList.push({
+          platform: 'Portfolio',
+          handle: 'Website',
+          url: portfolio.startsWith('http') ? portfolio : `https://${portfolio}`,
+        });
+      }
     }
 
     try {
@@ -347,13 +349,13 @@ export default function RegisterPage() {
 
       const data = await res.json();
       if (!res.ok) {
-        throw new Error(data.error || 'Failed to submit profile.');
+        throw new Error(data.error || 'Failed to finalize profile.');
       }
 
-      setSuccess('Your profile is ready!');
+      setSuccess('Setup complete!');
       setTimeout(() => {
         resolveRedirect();
-      }, 1000);
+      }, 800);
     } catch (err: any) {
       setError(err.message || 'Something went wrong.');
       setLoading(false);
@@ -362,19 +364,26 @@ export default function RegisterPage() {
 
   return (
     <div className={styles.container}>
-      {/* WIZARD PROGRESS HEADER */}
+      {/* PROGRESS HEADER */}
       <div className={styles.header}>
         <div className={styles.logo}>
           Tap<span>folio</span>
         </div>
         <div className={styles.stepIndicatorRow}>
-          {[1, 2, 3, 4, 5].map((s) => (
+          {[1, 2, 3, 4, 5, 6, 7].map((s) => (
             <div
               key={s}
               className={`${styles.stepDot} ${step === s ? styles.activeDot : ''} ${step > s ? styles.completedDot : ''}`}
             >
               <span>{s}</span>
-              <label>{s === 1 ? 'Identity' : s === 2 ? 'Profile' : s === 3 ? 'Privacy' : s === 4 ? 'Socials' : 'Finish'}</label>
+              <label>
+                {s === 1 ? 'Welcome' :
+                 s === 2 ? 'Register' :
+                 s === 3 ? 'Live' :
+                 s === 4 ? 'Username' :
+                 s === 5 ? 'Bio' :
+                 s === 6 ? 'Privacy' : 'Socials'}
+              </label>
             </div>
           ))}
         </div>
@@ -385,31 +394,63 @@ export default function RegisterPage() {
           {error && <div className={styles.errorAlert}>{error}</div>}
           {success && <div className={styles.successAlert}>{success}</div>}
 
-          {/* STEP 1: IDENTITY */}
+          {/* STEP 1: WELCOME SCREEN */}
           {step === 1 && (
-            <form onSubmit={handleStep1Submit} className={styles.form}>
-              <div className={styles.authHeader}>
-                <h2>Create account</h2>
-                <p>Begin your identity configuration</p>
+            <div className={styles.stepContainer}>
+              <div className={styles.authHeader} style={{ textAlign: 'center' }}>
+                <h2>Your professional identity.<br/>One tap away.</h2>
+                <p>Build and share a premium digital NFC profile in seconds.</p>
               </div>
 
-              <button
-                type="button"
-                onClick={handleGoogleSignup}
-                disabled={loading}
-                className={styles.googleBtn}
-              >
-                <svg className={styles.googleSvg} viewBox="0 0 24 24" width="20" height="20" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
-                  <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
-                  <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z" fill="#FBBC05"/>
-                  <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
-                </svg>
-                Sign up with Google
-              </button>
+              <div className={styles.bullets} style={{ margin: '1rem 0' }}>
+                <div className={styles.privacyItem}>
+                  <span>⚡ Share your profile instantly via NFC</span>
+                </div>
+                <div className={styles.privacyItem}>
+                  <span>👥 Connect and network with nearby builders</span>
+                </div>
+                <div className={styles.privacyItem}>
+                  <span>🔒 Fully control your sharing visibilities</span>
+                </div>
+              </div>
 
-              <div className={styles.divider}>
-                <span>or email signup</span>
+              <div className={styles.form}>
+                <button
+                  type="button"
+                  onClick={handleGoogleSignup}
+                  className={styles.googleBtn}
+                >
+                  <svg className={styles.googleSvg} viewBox="0 0 24 24" width="20" height="20" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+                    <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+                    <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z" fill="#FBBC05"/>
+                    <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+                  </svg>
+                  Continue with Google
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setStep(2)}
+                  className={styles.submitBtn}
+                  style={{ background: 'rgba(255, 255, 255, 0.05)', border: '1px solid rgba(255,255,255,0.1)' }}
+                >
+                  Continue with Email
+                </button>
+
+                <div className={styles.loginBackLink}>
+                  Already have an account? <Link href="/login" className={styles.link}>Sign In</Link>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* STEP 2: CREATE ACCOUNT (Email setup, Name/Email/Pass only) */}
+          {step === 2 && (
+            <form onSubmit={handleStep2Submit} className={styles.form}>
+              <div className={styles.authHeader}>
+                <h2>Create Account</h2>
+                <p>Register to go live instantly</p>
               </div>
 
               <div className={styles.inputGroup}>
@@ -418,50 +459,11 @@ export default function RegisterPage() {
                   id="name"
                   type="text"
                   required
-                  placeholder="John Doe"
+                  placeholder="Mohammed Nibras"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   disabled={loading}
                 />
-              </div>
-
-              <div className={styles.inputGroup}>
-                <label htmlFor="username">Username (@handle)</label>
-                <input
-                  id="username"
-                  type="text"
-                  required
-                  placeholder="username"
-                  value={username}
-                  onChange={(e) => setUsername(e.target.value)}
-                  disabled={loading}
-                />
-                
-                {/* Username checks indicators */}
-                {usernameChecking && <span className={styles.checkingText}>🔄 Checking availability...</span>}
-                {usernameAvailable === true && <span className={styles.availableText}>✅ Username is available!</span>}
-                {usernameAvailable === false && (
-                  <div className={styles.takenContainer}>
-                    <span className={styles.takenText}>❌ Taken. {usernameError || 'Try another.'}</span>
-                    {usernameSuggestions.length > 0 && (
-                      <div className={styles.suggestions}>
-                        <span>Suggestions:</span>
-                        <div className={styles.chipsRow}>
-                          {usernameSuggestions.map((s) => (
-                            <button
-                              key={s}
-                              type="button"
-                              className={styles.chip}
-                              onClick={() => setUsername(s)}
-                            >
-                              {s}
-                            </button>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                )}
               </div>
 
               <div className={styles.inputGroup}>
@@ -470,7 +472,7 @@ export default function RegisterPage() {
                   id="email"
                   type="email"
                   required
-                  placeholder="you@example.com"
+                  placeholder="mohammed@example.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   disabled={loading}
@@ -493,17 +495,11 @@ export default function RegisterPage() {
                     type="button"
                     className={styles.togglePasswordBtn}
                     onClick={() => setShowPassword(!showPassword)}
-                    aria-label={showPassword ? 'Hide password' : 'Show password'}
                   >
-                    {showPassword ? (
-                      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9.88 9.88a3 3 0 1 0 4.24 4.24" /><path d="M10.73 5.08A10.43 10.43 0 0 1 12 5c7 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68" /><path d="M6.61 6.61A13.52 13.52 0 0 0 2 12s3 7 10 7a9.74 9.74 0 0 0 5.39-1.61" /><line x1="2" y1="2" x2="22" y2="22" /></svg>
-                    ) : (
-                      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0z" /><circle cx="12" cy="12" r="3" /></svg>
-                    )}
+                    {showPassword ? '🙈' : '👁️'}
                   </button>
                 </div>
 
-                {/* Password strength meter */}
                 {password && (
                   <div className={styles.strengthMeter}>
                     <div className={`${styles.strengthBar} ${
@@ -512,7 +508,7 @@ export default function RegisterPage() {
                       passwordStrength === 'strong' ? styles.strongBar : ''
                     }`} />
                     <span className={styles.strengthText}>
-                      Password strength: <strong>{passwordStrength}</strong>
+                      Password: <strong>{passwordStrength}</strong>
                     </span>
                   </div>
                 )}
@@ -520,24 +516,133 @@ export default function RegisterPage() {
 
               <button
                 type="submit"
-                disabled={loading || !usernameAvailable}
+                disabled={loading || password.length < 6}
                 className={styles.submitBtn}
               >
-                {loading ? 'Creating account...' : 'Create Account & Continue'}
+                {loading ? 'Creating Account...' : 'Create Account'}
               </button>
-
-              <div className={styles.loginBackLink}>
-                Already have a profile? <Link href="/login" className={styles.link}>Sign In</Link>
-              </div>
             </form>
           )}
 
-          {/* STEP 2: PROFILE SETUP */}
-          {step === 2 && (
+          {/* STEP 3: FIRST SUCCESS MOMENT (Celebration) */}
+          {step === 3 && (
+            <div className={styles.stepContainer} style={{ textAlign: 'center' }}>
+              <div className={styles.authHeader}>
+                <h2>Welcome, {name.split(' ')[0]}! 🎉</h2>
+                <h3 style={{ color: 'var(--accent-success)', marginTop: '0.5rem' }}>Your profile is live!</h3>
+              </div>
+
+              <div className={styles.previewCardOuter}>
+                <div className={`${styles.glowCard} glass-panel`}>
+                  <div className={styles.avatarPreviewWrapper} style={{ margin: '0 auto 1rem auto' }}>
+                    <img src={avatar} alt="Avatar" className={styles.avatarPreview} />
+                  </div>
+                  <div className={styles.cardName}>{name}</div>
+                  <div className={styles.cardHandle}>@{username}</div>
+                  <div className={styles.cardTagline} style={{ marginTop: '0.5rem' }}>
+                    tapfolio.me/@{username}
+                  </div>
+                </div>
+              </div>
+
+              <div className={styles.form} style={{ gap: '1rem' }}>
+                <button
+                  type="button"
+                  onClick={() => setStep(4)}
+                  className={styles.submitBtn}
+                >
+                  Continue Setup (Recommended)
+                </button>
+
+                <button
+                  type="button"
+                  onClick={resolveRedirect}
+                  className={styles.submitBtn}
+                  style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)' }}
+                >
+                  Explore Dashboard
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* STEP 4: CHOOSE USERNAME */}
+          {step === 4 && (
             <div className={styles.stepContainer}>
               <div className={styles.authHeader}>
-                <h2>Onboarding: Profile Setup</h2>
-                <p>Add some personality to your digital card</p>
+                <h2>Choose Username</h2>
+                <p>Customize your Tapfolio link prefix</p>
+              </div>
+
+              <div className={styles.inputGroup}>
+                <label htmlFor="username">Handle (@username)</label>
+                <input
+                  id="username"
+                  type="text"
+                  required
+                  placeholder="username"
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
+                  disabled={loading}
+                />
+
+                {usernameChecking && <span className={styles.checkingText}>🔄 Checking availability...</span>}
+                {usernameAvailable === true && <span className={styles.availableText}>✅ Username available!</span>}
+                {usernameAvailable === false && (
+                  <div className={styles.takenContainer}>
+                    <span className={styles.takenText}>❌ Occupied. {usernameError || 'Try another.'}</span>
+                    {usernameSuggestions.length > 0 && (
+                      <div className={styles.suggestions}>
+                        <span>Suggestions:</span>
+                        <div className={styles.chipsRow}>
+                          {usernameSuggestions.map((s) => (
+                            <button
+                              key={s}
+                              type="button"
+                              className={styles.chip}
+                              onClick={() => {
+                                setUsername(s);
+                                setUsernameAvailable(true);
+                              }}
+                            >
+                              {s}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+
+              <div className={styles.form} style={{ gap: '1rem', marginTop: '1rem' }}>
+                <button
+                  type="button"
+                  onClick={handleStep4Submit}
+                  disabled={loading || usernameAvailable === false}
+                  className={styles.submitBtn}
+                >
+                  Save Username
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setStep(5)}
+                  className={styles.submitBtn}
+                  style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.05)' }}
+                >
+                  Skip
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* STEP 5: PROFILE ESSENTIALS */}
+          {step === 5 && (
+            <div className={styles.stepContainer}>
+              <div className={styles.authHeader}>
+                <h2>Profile Essentials</h2>
+                <p>Add profile visuals and headlines</p>
               </div>
 
               <div className={styles.avatarSetupRow}>
@@ -545,7 +650,7 @@ export default function RegisterPage() {
                   {uploadingAvatar ? (
                     <div className={styles.avatarSpinner}></div>
                   ) : (
-                    <img src={avatar} alt="Profile Avatar" className={styles.avatarPreview} />
+                    <img src={avatar} alt="Avatar" className={styles.avatarPreview} />
                   )}
                 </div>
 
@@ -561,7 +666,7 @@ export default function RegisterPage() {
                     />
                   </label>
 
-                  <div className={styles.presetsLabel}>Or choose preset avatar:</div>
+                  <div className={styles.presetsLabel}>Choose Preset:</div>
                   <div className={styles.presetsGrid}>
                     {[1, 2, 3, 4, 5, 6].map((idx) => (
                       <button
@@ -586,49 +691,51 @@ export default function RegisterPage() {
               </div>
 
               <div className={styles.inputGroup}>
-                <label htmlFor="tagline">Tagline / Professional Headline</label>
+                <label htmlFor="tagline">Headline / Tagline</label>
                 <input
                   id="tagline"
                   type="text"
-                  placeholder="Full-stack Developer | Designer | Creator"
+                  placeholder="e.g. Software Developer, Founder..."
                   value={tagline}
                   onChange={(e) => setTagline(e.target.value)}
                 />
               </div>
 
               <div className={styles.inputGroup}>
-                <label htmlFor="bio">Bio / About Me</label>
+                <label htmlFor="bio">Bio (Optional)</label>
                 <textarea
                   id="bio"
                   rows={3}
                   className={styles.textarea}
-                  placeholder="Write a brief intro about yourself..."
+                  placeholder="Write a brief intro..."
                   value={bio}
                   onChange={(e) => setBio(e.target.value)}
                 />
               </div>
 
-              <div className={styles.btnRow}>
-                <button onClick={() => setStep(3)} className={styles.submitBtn}>
-                  Next: Sharing Preferences
-                </button>
-              </div>
+              <button
+                type="button"
+                onClick={() => setStep(6)}
+                className={styles.submitBtn}
+              >
+                Continue
+              </button>
             </div>
           )}
 
-          {/* STEP 3: PRIVACY PREFERENCES */}
-          {step === 3 && (
+          {/* STEP 6: SHARING PREFERENCES */}
+          {step === 6 && (
             <div className={styles.stepContainer}>
               <div className={styles.authHeader}>
-                <h2>Default Sharing Preferences</h2>
-                <p>Choose what others see by default when you connect</p>
+                <h2>Sharing Preferences</h2>
+                <p>Choose your default sharing settings</p>
               </div>
 
               <div className={styles.privacyToggles}>
                 <div className={styles.privacyItem}>
                   <div className={styles.privacyLabelRow}>
                     <span>Display Name</span>
-                    <span className={styles.requiredTag}>Always Shared</span>
+                    <span className={styles.requiredTag}>Required</span>
                   </div>
                   <input type="checkbox" checked={shareName} disabled className={styles.checkbox} />
                 </div>
@@ -636,7 +743,7 @@ export default function RegisterPage() {
                 <div className={styles.privacyItem}>
                   <div className={styles.privacyLabelRow}>
                     <span>Email Address</span>
-                    <p className={styles.privacyDesc}>Share your email address automatically</p>
+                    <p className={styles.privacyDesc}>Show email by default</p>
                   </div>
                   <input
                     type="checkbox"
@@ -649,7 +756,7 @@ export default function RegisterPage() {
                 <div className={styles.privacyItem}>
                   <div className={styles.privacyLabelRow}>
                     <span>Phone Number</span>
-                    <p className={styles.privacyDesc}>Show your phone number to connections</p>
+                    <p className={styles.privacyDesc}>Show phone by default</p>
                   </div>
                   <input
                     type="checkbox"
@@ -661,8 +768,8 @@ export default function RegisterPage() {
 
                 <div className={styles.privacyItem}>
                   <div className={styles.privacyLabelRow}>
-                    <span>WhatsApp Number</span>
-                    <p className={styles.privacyDesc}>Allow connections to send messages on WhatsApp</p>
+                    <span>WhatsApp</span>
+                    <p className={styles.privacyDesc}>Enable WhatsApp directs</p>
                   </div>
                   <input
                     type="checkbox"
@@ -675,7 +782,7 @@ export default function RegisterPage() {
                 <div className={styles.privacyItem}>
                   <div className={styles.privacyLabelRow}>
                     <span>Location</span>
-                    <p className={styles.privacyDesc}>Show your city/location on profile card</p>
+                    <p className={styles.privacyDesc}>Show location city</p>
                   </div>
                   <input
                     type="checkbox"
@@ -686,41 +793,43 @@ export default function RegisterPage() {
                 </div>
               </div>
 
-              <div className={styles.btnRow}>
-                <button onClick={() => setStep(4)} className={styles.submitBtn}>
-                  Next: Social Links Setup
-                </button>
-              </div>
+              <button
+                type="button"
+                onClick={() => setStep(7)}
+                className={styles.submitBtn}
+              >
+                Continue
+              </button>
             </div>
           )}
 
-          {/* STEP 4: SOCIAL LINKS */}
-          {step === 4 && (
+          {/* STEP 7: SOCIAL HANDLES */}
+          {step === 7 && (
             <div className={styles.stepContainer}>
               <div className={styles.authHeader}>
-                <h2>Onboarding: Social Links</h2>
-                <p>Link your profiles so connections can find you</p>
+                <h2>Link Socials (Optional)</h2>
+                <p>Connect your links to build your network</p>
               </div>
 
               <div className={styles.inputGroup}>
-                <label htmlFor="github">GitHub Username</label>
-                <input
-                  id="github"
-                  type="text"
-                  placeholder="github-username"
-                  value={github}
-                  onChange={(e) => setGithub(e.target.value)}
-                />
-              </div>
-
-              <div className={styles.inputGroup}>
-                <label htmlFor="linkedin">LinkedIn Username / Profile Handle</label>
+                <label htmlFor="linkedin">LinkedIn Handle</label>
                 <input
                   id="linkedin"
                   type="text"
                   placeholder="linkedin-username"
                   value={linkedin}
                   onChange={(e) => setLinkedin(e.target.value)}
+                />
+              </div>
+
+              <div className={styles.inputGroup}>
+                <label htmlFor="github">GitHub Handle</label>
+                <input
+                  id="github"
+                  type="text"
+                  placeholder="github-username"
+                  value={github}
+                  onChange={(e) => setGithub(e.target.value)}
                 />
               </div>
 
@@ -736,7 +845,7 @@ export default function RegisterPage() {
               </div>
 
               <div className={styles.inputGroup}>
-                <label htmlFor="portfolio">Portfolio URL / Custom Link</label>
+                <label htmlFor="portfolio">Portfolio Website</label>
                 <input
                   id="portfolio"
                   type="text"
@@ -746,47 +855,26 @@ export default function RegisterPage() {
                 />
               </div>
 
-              <div className={styles.btnRow}>
-                <button onClick={() => setStep(5)} className={styles.submitBtn}>
-                  Next: Finalize Profile
+              <div className={styles.form} style={{ gap: '1rem', marginTop: '1rem' }}>
+                <button
+                  type="button"
+                  onClick={() => handleFinalSubmit(false)}
+                  disabled={loading}
+                  className={styles.submitBtn}
+                >
+                  {loading ? 'Saving Setup...' : 'Save & Continue'}
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => handleFinalSubmit(true)}
+                  disabled={loading}
+                  className={styles.submitBtn}
+                  style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.05)' }}
+                >
+                  Skip For Now
                 </button>
               </div>
-            </div>
-          )}
-
-          {/* STEP 5: CARD PREVIEW & SUBMIT */}
-          {step === 5 && (
-            <div className={styles.stepContainer}>
-              <div className={styles.authHeader}>
-                <h2>Create your profile</h2>
-                <p>Your Tapfolio is ready! Review your digital card:</p>
-              </div>
-
-              <div className={styles.previewCardOuter}>
-                <div className={`${styles.glowCard} glass-panel`}>
-                  <img src={avatar} alt="Avatar" className={styles.avatarPreviewCard} />
-                  <div className={styles.cardName}>{name || 'Your Name'}</div>
-                  <div className={styles.cardHandle}>@{username || 'handle'}</div>
-                  {tagline && <div className={styles.cardTagline}>{tagline}</div>}
-                  {bio && <p className={styles.cardBio}>{bio}</p>}
-
-                  {/* Social badges simulation */}
-                  <div className={styles.cardSocialIcons}>
-                    {github && <span className={styles.cardIconChip}>🔗 GitHub</span>}
-                    {linkedin && <span className={styles.cardIconChip}>🔗 LinkedIn</span>}
-                    {instagram && <span className={styles.cardIconChip}>🔗 Instagram</span>}
-                    {portfolio && <span className={styles.cardIconChip}>🔗 Website</span>}
-                  </div>
-                </div>
-              </div>
-
-              <button
-                onClick={handleFinalSubmit}
-                disabled={loading}
-                className={styles.submitBtn}
-              >
-                {loading ? 'Finalizing Profile...' : 'Create My Tapfolio Profile'}
-              </button>
             </div>
           )}
         </div>

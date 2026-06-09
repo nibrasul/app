@@ -12,6 +12,7 @@ model User {
   email               String           @unique
   passwordHash        String
   connectionCount     Int              @default(0)
+  profileReady        Boolean          @default(false)
   profile             Profile?
   sharingSettings     SharingSettings?
   createdAt           DateTime         @default(now())

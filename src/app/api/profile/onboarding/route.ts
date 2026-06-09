@@ -17,7 +17,7 @@ export async function PUT(request: Request) {
       return NextResponse.json({ error: 'Invalid token.' }, { status: 401 });
     }
 
-    const { tagline, bio, avatar, socials, sharingSettings } = await request.json();
+    const { username, tagline, bio, avatar, socials, sharingSettings } = await request.json();
 
     const existingProfile = await prisma.profile.findUnique({
       where: { userId: tokenPayload.userId }
@@ -25,6 +25,24 @@ export async function PUT(request: Request) {
 
     if (!existingProfile) {
       return NextResponse.json({ error: 'Profile not found. Please log in again.' }, { status: 404 });
+    }
+
+    let updatedUsername = existingProfile.username;
+    if (username !== undefined && username !== null) {
+      const cleanUsername = username.toLowerCase().trim();
+      if (!/^[a-z0-9_-]{3,20}$/.test(cleanUsername)) {
+        return NextResponse.json({ error: 'Username must be 3-20 characters long and contain only lowercase letters, numbers, hyphens, or underscores.' }, { status: 400 });
+      }
+      const takenProfile = await prisma.profile.findFirst({
+        where: {
+          username: cleanUsername,
+          userId: { not: tokenPayload.userId }
+        }
+      });
+      if (takenProfile) {
+        return NextResponse.json({ error: 'Username is already taken.' }, { status: 400 });
+      }
+      updatedUsername = cleanUsername;
     }
 
     // Map platforms to their proper default icons and colors if not specified
@@ -49,6 +67,7 @@ export async function PUT(request: Request) {
       const updatedProfile = await tx.profile.update({
         where: { userId: tokenPayload.userId },
         data: {
+          username: updatedUsername,
           tagline: tagline !== undefined ? tagline : undefined,
           bio: bio !== undefined ? bio : undefined,
           avatar: avatar !== undefined ? avatar : undefined,
@@ -112,6 +131,8 @@ export async function PUT(request: Request) {
       return { updatedProfile, updatedSettings };
     });
 
+    console.log(`[ONBOARDING] Successfully committed onboarding details for userId=${tokenPayload.userId}`);
+
     return NextResponse.json({
       success: true,
       message: 'Onboarding settings committed successfully!',
@@ -119,7 +140,7 @@ export async function PUT(request: Request) {
       sharingSettings: result.updatedSettings
     });
   } catch (error: any) {
-    console.error('Onboarding API error:', error);
+    console.error('[ONBOARDING] Onboarding API error:', error);
     return NextResponse.json({ error: 'Something went wrong during onboarding.' }, { status: 500 });
   }
 }
