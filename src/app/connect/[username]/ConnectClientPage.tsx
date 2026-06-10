@@ -254,19 +254,30 @@ END:VCARD`;
     document.body.removeChild(link);
   };
 
-  // Determine dynamic roles and location texts
-  const roles = profileData?.tags
-    ?.filter((t: any) => t.type === 'role')
-    .map((t: any) => t.text) || [];
-  
-  const displayRoles = roles.length > 0 ? roles : ['Photographer', 'Creator'];
+  // Determine dynamic roles and location texts for pills
+  const getRolesList = () => {
+    const list = profileData?.tags
+      ?.filter((t: any) => t.type === 'role')
+      .map((t: any) => t.text) || [];
+    if (list.length === 0) {
+      return profileData ? [] : ['Photographer', 'Creator'];
+    }
+    return list;
+  };
 
-  const locationString = profileData?.tags
-    ?.find((t: any) => t.type === 'location')
-    ?.text || 'Calicut, India';
+  const getLocationString = () => {
+    const loc = profileData?.tags
+      ?.find((t: any) => t.type === 'location')
+      ?.text || '';
+    if (!loc) {
+      return profileData ? '' : 'Calicut, India';
+    }
+    return loc;
+  };
 
-  // Use the bio from profileData, fallback to profile tagline, or mockup template fallback
-  const bioText = profileData?.bio || profile.tagline || (loadingProfile ? '' : 'Photographer, Creator & Visual Storyteller helping brands and businesses create engaging visual experiences.');
+  const rolesList = getRolesList();
+  const locationString = getLocationString();
+  const bioText = profileData?.bio || (profileData ? '' : 'Photographer, visual storyteller and creative professional helping brands and individuals create memorable experiences.');
 
   // Social grid rendering: fallback to Antony Alex photo template if no links configured
   const getSocialsList = () => {
@@ -338,33 +349,29 @@ END:VCARD`;
             alt={profile.name}
             className={styles.avatar}
           />
-          <span className={styles.greeting}>👋 Hey, I am</span>
+          <div className={styles.greeting}>👋 Hey, I'm</div>
           <h1 className={styles.name}>{profile.name}</h1>
           
-          {bioText && (
-            <p className={styles.bioDescription}>{bioText}</p>
+          {/* Skills & Location Pills */}
+          {(rolesList.length > 0 || locationString) && (
+            <div className={styles.pillContainer}>
+              {rolesList.map((role: string, idx: number) => (
+                <span key={idx} className={styles.pill}>{role}</span>
+              ))}
+              {locationString && (
+                <span className={styles.pill}>
+                  📍 {locationString}
+                </span>
+              )}
+            </div>
           )}
 
-          <div className={styles.pillsContainer}>
-            <div className={styles.rolesRow}>
-              {displayRoles.map((role: string, idx: number) => (
-                <span key={idx} className={styles.rolePill}>
-                  {role}
-                </span>
-              ))}
-            </div>
-            {locationString && (
-              <div className={styles.locationRow}>
-                <span className={styles.locationPill}>
-                  <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" className={styles.locationPillIcon}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M15 10.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0z" />
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1 1 15 0z" />
-                  </svg>
-                  <span>{locationString}</span>
-                </span>
-              </div>
-            )}
-          </div>
+          {/* Short Bio Description */}
+          {bioText && (
+            <p className={styles.profileDescription}>
+              {bioText}
+            </p>
+          )}
         </div>
 
         {/* Save Contact CTA Outlined Purple Button */}
@@ -398,9 +405,43 @@ END:VCARD`;
           })}
         </div>
 
-        {/* Contact Details Section Accordion Card */}
-        {contactItems.length > 0 && (
-          <div className={styles.accordionCard}>
+        {/* Accordion Expandable Information Card */}
+        <div className={styles.accordionCard}>
+          {/* About Me Section */}
+          {(profileData?.bio || loadingProfile) && (
+            <div className={styles.accordionSection}>
+              <div className={styles.accordionRow} onClick={() => setAboutOpen(!aboutOpen)}>
+                <div className={styles.accordionRowLeft}>
+                  <span className={styles.accordionIcon}>
+                    <svg width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0zM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
+                    </svg>
+                  </span>
+                  <span className={styles.accordionTitle}>About Me</span>
+                </div>
+                <span className={`${styles.accordionChevron} ${aboutOpen ? styles.chevronOpen : ''}`}>
+                  <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+                  </svg>
+                </span>
+              </div>
+              
+              {/* Expandable Bio Text block */}
+              {aboutOpen && (
+                <div className={styles.aboutContent}>
+                  {profileData?.bio || 'Photographer and visual storyteller specializing in weddings, brands, and commercial campaigns.'}
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Divider line between accordion sections (only if both are shown) */}
+          {(profileData?.bio || loadingProfile) && contactItems.length > 0 && (
+            <div className={styles.accordionDivider} />
+          )}
+
+          {/* Contact Details Section */}
+          {contactItems.length > 0 && (
             <div className={styles.accordionSection}>
               <div className={styles.accordionRow} onClick={() => setContactOpen(!contactOpen)}>
                 <div className={styles.accordionRowLeft}>
@@ -431,8 +472,8 @@ END:VCARD`;
                 </div>
               )}
             </div>
-          </div>
-        )}
+          )}
+        </div>
 
         {error && <p className={styles.error}>{error}</p>}
 
