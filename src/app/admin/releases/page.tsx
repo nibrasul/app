@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import Header from '@/components/Header';
+import LoadingScreen from '@/components/LoadingScreen';
 import styles from './page.module.css';
 
 interface Release {
@@ -178,12 +179,7 @@ export default function AdminReleasesPage() {
   };
 
   if (loading) {
-    return (
-      <div className={styles.loadingWrapper}>
-        <div className={styles.spinner}></div>
-        <p>Verifying admin authorization...</p>
-      </div>
-    );
+    return <LoadingScreen message="Verifying admin authorization..." />;
   }
 
   if (!authorized) {

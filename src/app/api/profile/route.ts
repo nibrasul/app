@@ -21,7 +21,8 @@ export async function GET(request: Request) {
           user: {
             select: {
               profileReady: true,
-              sharingSettings: true
+              sharingSettings: true,
+              connectionCount: true
             }
           }
         }
@@ -35,7 +36,8 @@ export async function GET(request: Request) {
           user: {
             select: {
               profileReady: true,
-              sharingSettings: true
+              sharingSettings: true,
+              connectionCount: true
             }
           }
         }
@@ -58,7 +60,8 @@ export async function GET(request: Request) {
           user: {
             select: {
               profileReady: true,
-              sharingSettings: true
+              sharingSettings: true,
+              connectionCount: true
             }
           }
         }
@@ -216,7 +219,8 @@ export async function PUT(request: Request) {
         user: {
           select: {
             profileReady: true,
-            sharingSettings: true
+            sharingSettings: true,
+            connectionCount: true
           }
         }
       }
@@ -235,7 +239,8 @@ export async function PUT(request: Request) {
         user: {
           select: {
             profileReady: true,
-            sharingSettings: true
+            sharingSettings: true,
+            connectionCount: true
           }
         }
       }

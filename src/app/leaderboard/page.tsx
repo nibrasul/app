@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Header from '@/components/Header';
+import LoadingScreen from '@/components/LoadingScreen';
 import styles from './page.module.css';
 
 interface Tag {
@@ -51,12 +52,7 @@ export default function LeaderboardPage() {
   }, []);
 
   if (loading) {
-    return (
-      <div className={styles.loadingWrapper}>
-        <div className={styles.spinner}></div>
-        <p>Loading leaderboard rankings...</p>
-      </div>
-    );
+    return <LoadingScreen message="Loading leaderboard rankings..." />;
   }
 
   return (

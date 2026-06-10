@@ -1,0 +1,204 @@
+.loadingWrapper {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  background: #07080d;
+  z-index: 9999;
+  overflow: hidden;
+  font-family: var(--font-sans);
+}
+
+/* Background grid overlay */
+.gridOverlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-image: 
+    linear-gradient(rgba(255, 255, 255, 0.012) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.012) 1px, transparent 1px);
+  background-size: 50px 50px;
+  background-position: center;
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* Beautiful moving glow blobs */
+.bgBlob1 {
+  position: absolute;
+  top: 20%;
+  left: 20%;
+  width: 45vw;
+  height: 45vw;
+  background: radial-gradient(circle, rgba(99, 102, 241, 0.12) 0%, rgba(99, 102, 241, 0) 70%);
+  filter: blur(60px);
+  pointer-events: none;
+  z-index: 0;
+  animation: float1 10s ease-in-out infinite alternate;
+}
+
+.bgBlob2 {
+  position: absolute;
+  bottom: 20%;
+  right: 20%;
+  width: 45vw;
+  height: 45vw;
+  background: radial-gradient(circle, rgba(168, 85, 247, 0.12) 0%, rgba(168, 85, 247, 0) 70%);
+  filter: blur(60px);
+  pointer-events: none;
+  z-index: 0;
+  animation: float2 10s ease-in-out infinite alternate;
+}
+
+@keyframes float1 {
+  0% { transform: translate(-5%, -5%) scale(1); }
+  100% { transform: translate(5%, 5%) scale(1.1); }
+}
+
+@keyframes float2 {
+  0% { transform: translate(5%, 5%) scale(1); }
+  100% { transform: translate(-5%, -5%) scale(1.1); }
+}
+
+/* Main Loader Container */
+.loaderContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2.25rem;
+  z-index: 10;
+  animation: scaleFadeIn 0.5s ease-out forwards;
+}
+
+@keyframes scaleFadeIn {
+  from { transform: scale(0.95); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+
+/* Futuristic Concentric Spinner */
+.spinnerWrapper {
+  position: relative;
+  width: 110px;
+  height: 110px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ringOuter {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  border: 3px solid transparent;
+  border-top-color: #6366f1;
+  border-bottom-color: #6366f1;
+  animation: spinClockwise 1.8s cubic-bezier(0.53, 0.21, 0.29, 0.67) infinite;
+  filter: drop-shadow(0 0 8px rgba(99, 102, 241, 0.45));
+}
+
+.ringMiddle {
+  position: absolute;
+  width: 80%;
+  height: 80%;
+  border-radius: 50%;
+  border: 2.5px solid transparent;
+  border-left-color: #a855f7;
+  border-right-color: #a855f7;
+  animation: spinCounterClockwise 1.4s cubic-bezier(0.53, 0.21, 0.29, 0.67) infinite;
+  filter: drop-shadow(0 0 6px rgba(168, 85, 247, 0.45));
+}
+
+.ringInner {
+  position: absolute;
+  width: 60%;
+  height: 60%;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  border-top-color: #fff;
+  animation: spinClockwise 1s linear infinite;
+  opacity: 0.8;
+}
+
+.centerLogo {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 42px;
+  height: 42px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3), inset 0 1px 1px rgba(255, 255, 255, 0.05);
+  border-radius: 50%;
+  z-index: 5;
+  animation: logoPulse 1.8s ease-in-out infinite;
+}
+
+.centerLogo span {
+  font-size: 1.25rem;
+  color: #fff;
+  text-shadow: 0 0 10px rgba(255, 255, 255, 0.8);
+}
+
+@keyframes spinClockwise {
+  to { transform: rotate(360deg); }
+}
+
+@keyframes spinCounterClockwise {
+  to { transform: rotate(-360deg); }
+}
+
+@keyframes logoPulse {
+  0%, 100% { transform: scale(1); box-shadow: 0 0 15px rgba(99, 102, 241, 0.2); }
+  50% { transform: scale(1.06); box-shadow: 0 0 25px rgba(99, 102, 241, 0.45); }
+}
+
+/* Typography styles */
+.textContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.logoText {
+  font-size: 1.45rem;
+  font-weight: 900;
+  color: #fff;
+  letter-spacing: -0.5px;
+  margin: 0;
+}
+
+.logoText span {
+  color: #818cf8;
+}
+
+.typingWrapper {
+  overflow: hidden;
+  border-right: 2px solid transparent;
+  white-space: nowrap;
+  margin: 0 auto;
+  letter-spacing: 0.5px;
+}
+
+.loadingMessage {
+  font-size: 0.85rem;
+  color: #9ca3af;
+  font-weight: 550;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  animation: messagePulse 1.5s ease-in-out infinite;
+}
+
+@keyframes messagePulse {
+  0%, 100% { opacity: 0.65; }
+  50% { opacity: 1; }
+}

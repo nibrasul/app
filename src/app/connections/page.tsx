@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Header from '@/components/Header';
+import LoadingScreen from '@/components/LoadingScreen';
 import styles from './page.module.css';
 
 interface Tag {
@@ -219,12 +220,7 @@ export default function ConnectionsPage() {
   };
 
   if (loading) {
-    return (
-      <div className={styles.loadingWrapper}>
-        <div className={styles.spinner}></div>
-        <p>Loading your connections...</p>
-      </div>
-    );
+    return <LoadingScreen message="Loading your connections..." />;
   }
 
   return (
