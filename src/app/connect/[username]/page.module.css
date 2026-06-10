@@ -1,557 +1,457 @@
+@import url('https://fonts.googleapis.com/css2?family=Caveat:wght@700&family=Outfit:wght@400;500;600;700;800&display=swap');
+
 .wrapper {
   min-height: 100vh;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #06070d;
+  background: #f1f5f9;
   padding: 3rem 1.5rem;
   position: relative;
-  overflow: hidden;
-  font-family: var(--font-sans);
+  overflow-y: auto;
+  font-family: 'Outfit', sans-serif;
+  transition: background 0.4s ease;
 }
 
-/* Background grid overlay */
-.gridOverlay {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-image: 
-    linear-gradient(rgba(255, 255, 255, 0.015) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255, 255, 255, 0.015) 1px, transparent 1px);
-  background-size: 40px 40px;
-  background-position: center;
-  pointer-events: none;
-  z-index: 1;
-}
-
-/* Beautiful moving glow blobs */
-.backgroundGlowBlob1 {
-  position: absolute;
-  top: -15%;
-  left: -10%;
-  width: 60vw;
-  height: 60vw;
-  background: radial-gradient(circle, rgba(99, 102, 241, 0.15) 0%, rgba(99, 102, 241, 0) 70%);
-  filter: blur(80px);
-  pointer-events: none;
-  z-index: 0;
-  animation: floatGlow1 12s ease-in-out infinite alternate;
-}
-
-.backgroundGlowBlob2 {
-  position: absolute;
-  bottom: -15%;
-  right: -10%;
-  width: 60vw;
-  height: 60vw;
-  background: radial-gradient(circle, rgba(168, 85, 247, 0.15) 0%, rgba(168, 85, 247, 0) 70%);
-  filter: blur(80px);
-  pointer-events: none;
-  z-index: 0;
-  animation: floatGlow2 12s ease-in-out infinite alternate;
-}
-
-@keyframes floatGlow1 {
-  0% { transform: translate(0, 0) scale(1); }
-  100% { transform: translate(8vw, 8vw) scale(1.15); }
-}
-
-@keyframes floatGlow2 {
-  0% { transform: translate(0, 0) scale(1); }
-  100% { transform: translate(-8vw, -8vw) scale(1.15); }
-}
-
-/* Premium NFC-style card container */
+/* Premium Card container without phone borders */
 .card {
-  background: rgba(18, 20, 32, 0.6);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  backdrop-filter: blur(24px);
-  -webkit-backdrop-filter: blur(24px);
-  border-radius: 28px;
-  padding: 3rem 2rem;
-  text-align: center;
-  max-width: 440px;
+  background: #ffffff;
+  border-radius: 32px;
   width: 100%;
+  max-width: 480px;
   display: flex;
   flex-direction: column;
-  align-items: center;
-  gap: 1.25rem;
-  position: relative;
-  overflow: hidden;
-  box-shadow: 
-    0 30px 70px rgba(0, 0, 0, 0.6), 
-    0 0 100px rgba(99, 102, 241, 0.05),
-    0 0 0 1px rgba(255, 255, 255, 0.04) inset;
+  gap: 1.5rem;
+  padding: 2.5rem 2.25rem;
+  box-shadow: 0 10px 40px rgba(15, 23, 42, 0.04);
+  border: 1px solid rgba(15, 23, 42, 0.05);
   z-index: 10;
   animation: cardFadeUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  transition: all 0.3s ease;
 }
 
 @keyframes cardFadeUp {
-  from { opacity: 0; transform: translateY(30px); }
+  from { opacity: 0; transform: translateY(20px); }
   to   { opacity: 1; transform: translateY(0); }
 }
 
-/* Shimmer overlay line sweeping across the card */
-.shimmerOverlay {
-  position: absolute;
-  top: 0;
-  left: -150%;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(
-    90deg,
-    transparent 0%,
-    rgba(255, 255, 255, 0.02) 30%,
-    rgba(255, 255, 255, 0.07) 50%,
-    rgba(255, 255, 255, 0.02) 70%,
-    transparent 100%
-  );
-  transform: skewX(-25deg);
-  pointer-events: none;
-  z-index: 5;
-  animation: shineSweep 8s cubic-bezier(0.25, 1, 0.5, 1) infinite;
+.card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 14px 50px rgba(15, 23, 42, 0.07);
+  border-color: rgba(0, 82, 224, 0.1);
 }
 
-@keyframes shineSweep {
-  0% { left: -150%; }
-  35%, 100% { left: 150%; }
-}
-
-/* Top details area */
+/* Top bar: Header items */
 .cardTopBar {
   display: flex;
   justify-content: space-between;
   align-items: center;
   width: 100%;
-  margin-bottom: 0.5rem;
   z-index: 2;
 }
 
-/* smart NFC Chip look */
-.nfcChip {
-  width: 46px;
-  height: 34px;
-  background: linear-gradient(135deg, #e2e8f0 0%, #cbd5e1 50%, #94a3b8 100%);
-  border-radius: 6px;
+/* Tapfolio mini brand marker */
+.logoMark {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.logoIcon {
+  width: 28px;
+  height: 28px;
+  background: #0052e0;
+  border-radius: 7px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #ffffff;
+  font-weight: 850;
+  font-size: 1.1rem;
+}
+
+.logoText {
+  font-size: 1.2rem;
+  font-weight: 800;
+  color: #0052e0;
+  letter-spacing: -0.5px;
+}
+
+/* Points / Diamonds capsule counter */
+.pointsCapsule {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  background: #0052e0;
+  color: #ffffff;
+  padding: 0.35rem 0.65rem 0.35rem 0.5rem;
+  border-radius: 16px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  box-shadow: 0 3px 8px rgba(0, 82, 224, 0.15);
+}
+
+.pointsPlusBtn {
+  width: 15px;
+  height: 15px;
+  background: rgba(255, 255, 255, 0.22);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.7rem;
+  font-weight: bold;
+}
+
+/* Profile user identifiers */
+.profileIntro {
+  text-align: left;
+  width: 100%;
+  margin-bottom: -0.25rem;
+}
+
+.greetingText {
+  font-size: 0.88rem;
+  color: #64748b;
+  font-weight: 600;
+  margin-bottom: 0.2rem;
+}
+
+.name {
+  font-size: 2.2rem;
+  font-weight: 850;
+  color: #0c1938;
+  letter-spacing: -0.75px;
+  line-height: 1.1;
+  margin: 0 0 0.5rem 0;
+}
+
+/* Custom squiggly underline blue tagline */
+.squigglyUnderline {
   position: relative;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  overflow: hidden;
-  opacity: 0.85;
+  display: inline-block;
+  color: #0052e0;
+  font-weight: 750;
+  font-size: 1.05rem;
+  margin-bottom: 0.5rem;
+  padding-bottom: 6px;
 }
 
-.nfcInnerPattern {
-  position: absolute;
-  top: 10%;
-  left: 10%;
-  width: 80%;
-  height: 80%;
-  border: 1px solid rgba(0, 0, 0, 0.25);
-  border-radius: 4px;
-}
-
-.nfcInnerPattern::before,
-.nfcInnerPattern::after {
+.squigglyUnderline::after {
   content: '';
   position: absolute;
-  background: rgba(0, 0, 0, 0.25);
-}
-
-.nfcInnerPattern::before {
-  top: 0;
-  left: 50%;
-  width: 1px;
-  height: 100%;
-}
-
-.nfcInnerPattern::after {
-  top: 50%;
   left: 0;
-  height: 1px;
+  bottom: 0px;
   width: 100%;
+  height: 7px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 10' preserveAspectRatio='none'%3E%3Cpath d='M0,5 Q12.5,0 25,5 T50,5 T75,5 T100,5' fill='none' stroke='%230052e0' stroke-width='3.5' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-size: 100% 100%;
+  background-repeat: no-repeat;
 }
 
-.logoMark {
-  font-size: 1rem;
-  font-weight: 850;
-  color: #fff;
-  letter-spacing: -0.5px;
-  opacity: 0.8;
-  text-transform: uppercase;
+/* Horizontal card: Avatar side-by-side with profile tags stack */
+.profileIdentityRow {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  gap: 1.5rem;
 }
 
-.logoMark span {
-  color: #818cf8;
-}
-
-/* Avatar area with gradient circle border */
+/* Double-bordered Avatar circle */
 .avatarWrapper {
   position: relative;
   width: 110px;
   height: 110px;
-  margin-bottom: 0.5rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 2;
+  border-radius: 50%;
+  border: 2px solid #0052e0;
+  padding: 4px;
+  background: #ffffff;
+  flex-shrink: 0;
+  box-shadow: 0 4px 15px rgba(0, 82, 224, 0.05);
 }
 
 .avatar {
-  width: 96px;
-  height: 96px;
-  border-radius: 50%;
-  object-fit: cover;
-  z-index: 2;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
-}
-
-.avatarRing {
-  position: absolute;
   width: 100%;
   height: 100%;
   border-radius: 50%;
-  border: 2px solid transparent;
-  background: linear-gradient(135deg, #6366f1, #a855f7) border-box;
-  -webkit-mask: linear-gradient(#fff 0 0) padding-box, linear-gradient(#fff 0 0);
-  -webkit-mask-composite: destination-out;
-  mask-composite: exclude;
-  animation: spinRing 8s linear infinite;
-  z-index: 1;
+  object-fit: cover;
 }
 
-@keyframes spinRing {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
-}
-
-.premiumBadge {
+.onlineIndicator {
   position: absolute;
-  bottom: -4px;
-  background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
-  color: #0b0c10;
-  font-size: 0.65rem;
-  font-weight: 850;
-  padding: 0.25rem 0.6rem;
-  border-radius: 12px;
-  border: 1px solid rgba(255, 255, 255, 0.35);
-  box-shadow: 0 2px 8px rgba(245, 158, 11, 0.4);
-  z-index: 3;
-  letter-spacing: 0.5px;
+  bottom: 2px;
+  right: 2px;
+  width: 22px;
+  height: 22px;
+  background-color: #22c55e;
+  border: 3.5px solid #ffffff;
+  border-radius: 50%;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
 }
 
-.name {
-  font-size: 1.8rem;
-  font-weight: 800;
-  color: #fff;
-  margin: 0;
-  letter-spacing: -0.5px;
-}
-
-.tagline {
-  font-size: 0.95rem;
-  color: #9ca3af;
-  margin: 0;
-  font-weight: 450;
-  line-height: 1.4;
-}
-
-.bio {
-  font-size: 0.92rem;
-  color: #cbd5e1;
-  line-height: 1.55;
-  margin: 0.25rem 0;
-  text-align: center;
-  width: 100%;
-}
-
-/* Skill / Location tag display */
-.tagsContainer {
+/* Vertical stack of tags inside profile card */
+.tagsStack {
   display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 0.5rem;
-  margin: 0.25rem 0;
-  width: 100%;
+  flex-direction: column;
+  gap: 0.45rem;
+  flex-grow: 1;
 }
 
-.roleTag,
-.locationTag {
-  font-size: 0.72rem;
-  font-weight: 600;
-  padding: 0.4rem 0.8rem;
-  border-radius: 20px;
-  display: inline-flex;
+.profileTag {
+  display: flex;
   align-items: center;
-  gap: 0.3rem;
-  transition: all 0.2s ease;
+  gap: 0.65rem;
+  background: #f1f5f9;
+  padding: 0.45rem 0.85rem;
+  border-radius: 12px;
+  font-size: 0.76rem;
+  font-weight: 600;
+  color: #334155;
+  border: 1px solid rgba(0, 82, 224, 0.02);
 }
 
-.roleTag {
-  background: rgba(99, 102, 241, 0.08);
-  border: 1px solid rgba(99, 102, 241, 0.2);
-  color: #a5b4fc;
-}
-
-.roleTag:hover {
-  background: rgba(99, 102, 241, 0.15);
-  border-color: rgba(99, 102, 241, 0.35);
-  transform: translateY(-1px);
-}
-
-.locationTag {
-  background: rgba(16, 185, 129, 0.08);
-  border: 1px solid rgba(16, 185, 129, 0.2);
-  color: #a7f3d0;
-}
-
-.locationTag:hover {
-  background: rgba(16, 185, 129, 0.15);
-  border-color: rgba(16, 185, 129, 0.35);
-  transform: translateY(-1px);
+.tagIconWrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  background: rgba(0, 82, 224, 0.08);
+  border-radius: 6px;
+  color: #0052e0;
+  font-size: 0.74rem;
+  flex-shrink: 0;
 }
 
 .tagEmoji {
-  font-size: 0.8rem;
+  font-size: 0.74rem;
 }
 
-/* Stats view panel */
-.statsRow {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+/* Bio placement */
+.bioText {
+  font-size: 0.92rem;
+  color: #4b5563;
+  line-height: 1.6;
+  text-align: left;
   width: 100%;
-  margin: 0.5rem 0;
-  background: rgba(255, 255, 255, 0.02);
-  border: 1px solid rgba(255, 255, 255, 0.04);
-  border-radius: 20px;
-  padding: 1rem 0.5rem;
-  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.2);
+  margin-top: 0.25rem;
 }
 
-.statBox {
+.bioText strong {
+  color: #0c1938;
+  font-weight: 750;
+  border-bottom: 2px solid #0052e0;
+}
+
+/* Link tree white panel card */
+.linkTreeCard {
+  background: #ffffff;
+  border-radius: 24px;
+  border: 1px solid #f1f5f9;
+  box-shadow: 0 8px 30px rgba(15, 23, 42, 0.02);
+  padding: 1.4rem 1.25rem;
+  width: 100%;
   display: flex;
   flex-direction: column;
+  gap: 0.75rem;
+}
+
+.linkTreeHeader {
+  display: flex;
+  justify-content: center;
   align-items: center;
-  flex: 1;
-}
-
-.statVal {
-  font-size: 1.25rem;
+  gap: 0.6rem;
+  color: #0052e0;
+  font-size: 0.82rem;
   font-weight: 800;
-  color: #fff;
-}
-
-.statLabel {
-  font-size: 0.72rem;
-  color: #9ca3af;
-  margin-top: 0.25rem;
-  font-weight: 550;
   text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-
-.statBoxDivider {
-  width: 1px;
-  height: 28px;
-  background: rgba(255, 255, 255, 0.07);
-}
-
-/* Link tree section */
-.socialsSection {
-  width: 100%;
-  margin-top: 0.5rem;
-  text-align: left;
-}
-
-.sectionTitle {
-  font-size: 0.85rem;
-  font-weight: 750;
-  color: #6b7280;
-  margin: 0 0 0.75rem 0;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
-  padding-bottom: 0.35rem;
+  letter-spacing: 1.5px;
+  margin-bottom: 0.25rem;
 }
 
 .socialList {
   display: flex;
   flex-direction: column;
-  gap: 0.65rem;
 }
 
-.socialCard {
+/* App list item format */
+.socialRow {
   display: flex;
+  align-items: center;
   justify-content: space-between;
-  align-items: center;
-  padding: 0.85rem 1.1rem;
-  background: rgba(255, 255, 255, 0.02);
-  border: 1px solid rgba(255, 255, 255, 0.05);
-  border-radius: 16px;
+  padding: 0.9rem 0.15rem;
   text-decoration: none;
-  position: relative;
-  overflow: hidden;
-  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-  width: 100%;
-}
-
-.socialCardGlow {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  opacity: 0;
-  transition: opacity 0.25s ease;
-  pointer-events: none;
-}
-
-.socialCard:hover {
-  background: rgba(255, 255, 255, 0.04);
-  border-color: var(--platform-color);
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
-  transform: translateY(-2px);
-}
-
-.socialCard:hover .socialCardGlow {
-  opacity: 1;
-}
-
-.socialLeft {
-  display: flex;
-  align-items: center;
-  gap: 0.9rem;
-  z-index: 2;
-}
-
-.iconCircle {
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: transform 0.25s ease;
-}
-
-.socialCard:hover .iconCircle {
-  transform: scale(1.08) rotate(-5deg);
-}
-
-.socialSvg {
-  width: 18px;
-  height: 18px;
-}
-
-.socialInfo {
-  display: flex;
-  flex-direction: column;
-}
-
-.platform {
-  font-size: 0.92rem;
-  font-weight: 650;
-  color: #fff;
-}
-
-.handle {
-  font-size: 0.75rem;
-  color: #9ca3af;
-  margin-top: 0.05rem;
-}
-
-.arrowIcon {
-  width: 14px;
-  height: 14px;
-  color: #6b7280;
-  z-index: 2;
+  border-bottom: 1px solid #f1f5f9;
   transition: all 0.25s ease;
 }
 
-.socialCard:hover .arrowIcon {
-  color: #fff;
-  transform: translate(2px, -2px);
+.socialRow:last-child {
+  border-bottom: none;
 }
 
-/* Action button area */
+.socialRow:hover {
+  transform: translateX(3px);
+  background: rgba(0, 82, 224, 0.005);
+}
+
+.socialRowLeft {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+/* Rounded rect colorful app icons */
+.socialIconWrapper {
+  width: 42px;
+  height: 42px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #ffffff;
+  font-size: 1.35rem;
+  flex-shrink: 0;
+  transition: transform 0.25s ease;
+}
+
+.socialRow:hover .socialIconWrapper {
+  transform: scale(1.06) rotate(-3deg);
+}
+
+.socialSvg {
+  width: 20px;
+  height: 20px;
+}
+
+.socialLabels {
+  display: flex;
+  flex-direction: column;
+}
+
+.socialPlatformName {
+  font-size: 0.94rem;
+  font-weight: 750;
+  color: #0c1938;
+}
+
+.socialPlatformHandle {
+  font-size: 0.78rem;
+  color: #64748b;
+  margin-top: 0.1rem;
+}
+
+.socialRowRight {
+  color: #cbd5e1;
+  font-size: 1rem;
+  font-weight: 800;
+  transition: all 0.2s ease;
+  margin-right: 0.25rem;
+}
+
+.socialRow:hover .socialRowRight {
+  color: #0052e0;
+  transform: translateX(1px);
+}
+
+/* Bottom quote panel */
+.quoteBanner {
+  background: #0052e0;
+  border-radius: 20px;
+  padding: 1.1rem 1.4rem;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  color: #ffffff;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 8px 25px rgba(0, 82, 224, 0.18);
+}
+
+.quoteLeftIcon {
+  font-size: 3rem;
+  font-family: Georgia, serif;
+  color: rgba(255, 255, 255, 0.12);
+  position: absolute;
+  left: 10px;
+  top: -8px;
+  pointer-events: none;
+}
+
+.quoteText {
+  font-size: 0.8rem;
+  font-weight: 600;
+  line-height: 1.45;
+  max-width: 65%;
+  z-index: 2;
+  padding-left: 1.25rem;
+  text-align: left;
+}
+
+.quoteSignature {
+  font-family: 'Caveat', cursive, sans-serif;
+  font-size: 1.7rem;
+  color: #ffffff;
+  white-space: nowrap;
+  z-index: 2;
+  margin-left: auto;
+  transform: rotate(-3deg);
+}
+
+/* Actions and status loaders */
 .actions {
   display: flex;
   flex-direction: column;
-  gap: 0.85rem;
+  gap: 0.75rem;
   width: 100%;
-  margin-top: 0.5rem;
-  z-index: 2;
+  margin-top: 0.25rem;
 }
 
-/* Premium shine sweep button styles */
 .openAppBtn {
   display: flex;
   align-items: center;
   justify-content: center;
   width: 100%;
-  padding: 1rem 1.5rem;
-  background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
-  color: #fff;
-  font-weight: 700;
-  font-size: 1rem;
+  padding: 1.05rem;
+  background: #0052e0;
+  color: #ffffff;
+  font-weight: 800;
+  font-size: 0.95rem;
   border-radius: 16px;
-  box-shadow: 0 4px 25px rgba(99, 102, 241, 0.4);
-  position: relative;
-  overflow: hidden;
-  transition: all 0.25s ease;
-}
-
-.openAppBtn::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(
-    90deg,
-    transparent,
-    rgba(255, 255, 255, 0.2),
-    transparent
-  );
-  transition: all 0.6s ease;
+  cursor: pointer;
+  box-shadow: 0 4px 15px rgba(0, 82, 224, 0.2);
+  border: none;
+  transition: all 0.2s ease;
 }
 
 .openAppBtn:hover {
+  background: #1d4ed8;
   transform: translateY(-2px);
-  box-shadow: 0 8px 35px rgba(99, 102, 241, 0.55);
-}
-
-.openAppBtn:hover::before {
-  left: 100%;
-}
-
-.openAppBtn:active {
-  transform: translateY(0);
+  box-shadow: 0 6px 20px rgba(0, 82, 224, 0.3);
 }
 
 .viewProfileLink {
   display: block;
   width: 100%;
-  padding: 0.8rem 1.5rem;
-  background: rgba(255, 255, 255, 0.01);
-  color: #9ca3af;
-  font-size: 0.88rem;
-  font-weight: 550;
-  border-radius: 14px;
-  border: 1px solid rgba(255, 255, 255, 0.05);
+  padding: 0.85rem;
+  background: #ffffff;
+  color: #64748b;
+  font-size: 0.85rem;
+  font-weight: 700;
+  border-radius: 16px;
+  border: 1px solid rgba(15, 23, 42, 0.05);
+  text-decoration: none;
+  text-align: center;
   transition: all 0.2s ease;
 }
 
 .viewProfileLink:hover {
-  background: rgba(255, 255, 255, 0.04);
-  color: #fff;
-  border-color: rgba(255, 255, 255, 0.1);
+  background: #f8fafc;
+  color: #0052e0;
+  border-color: rgba(0, 82, 224, 0.1);
 }
 
-/* Status Badges */
+/* Connection Badges */
 .statusBadgePending,
 .statusBadgeAccepted,
 .statusBadgeBlocked {
@@ -560,62 +460,52 @@
   justify-content: center;
   gap: 0.5rem;
   width: 100%;
-  padding: 1rem 1.5rem;
-  font-weight: 700;
+  padding: 1rem;
+  font-weight: 800;
   border-radius: 16px;
-  font-size: 0.95rem;
+  font-size: 0.92rem;
 }
 
 .statusBadgePending {
-  background: rgba(245, 158, 11, 0.08);
-  color: #fbbf24;
-  border: 1px solid rgba(245, 158, 11, 0.2);
+  background: rgba(245, 158, 11, 0.06);
+  color: #d97706;
+  border: 1px solid rgba(245, 158, 11, 0.12);
 }
 
 .statusBadgeAccepted {
-  background: rgba(16, 185, 129, 0.08);
-  color: #34d399;
-  border: 1px solid rgba(16, 185, 129, 0.2);
+  background: rgba(16, 185, 129, 0.06);
+  color: #059669;
+  border: 1px solid rgba(16, 185, 129, 0.12);
 }
 
 .statusBadgeBlocked {
-  background: rgba(239, 68, 68, 0.08);
-  color: #f87171;
-  border: 1px solid rgba(239, 68, 68, 0.2);
-}
-
-.statusEmoji {
-  font-size: 1.1rem;
-}
-
-/* Spinner loaders */
-.miniSpinner {
-  width: 18px;
-  height: 18px;
-  border: 2px solid rgba(255, 255, 255, 0.3);
-  border-top-color: #fff;
-  border-radius: 50%;
-  animation: spin 0.8s linear infinite;
+  background: rgba(239, 68, 68, 0.06);
+  color: #dc2626;
+  border: 1px solid rgba(239, 68, 68, 0.12);
 }
 
 .statusBadgeLoading {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 0.75rem;
+  gap: 0.6rem;
   width: 100%;
-  padding: 1rem 1.5rem;
-  background: rgba(255, 255, 255, 0.02);
-  color: #9ca3af;
+  padding: 1rem;
+  background: #ffffff;
+  color: #64748b;
   font-weight: 600;
   border-radius: 16px;
-  border: 1px solid rgba(255, 255, 255, 0.05);
-  font-size: 0.9rem;
+  border: 1px solid rgba(15, 23, 42, 0.05);
+  font-size: 0.88rem;
 }
 
-.statusBadgeLoading .miniSpinner {
-  border: 2px solid rgba(255, 255, 255, 0.1);
-  border-top-color: #9ca3af;
+.miniSpinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(0, 82, 224, 0.1);
+  border-top-color: #0052e0;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
 }
 
 @keyframes spin {
@@ -623,35 +513,55 @@
 }
 
 .error {
-  color: #f87171;
-  font-size: 0.85rem;
-  margin-top: 0.25rem;
+  color: #dc2626;
+  font-size: 0.82rem;
   text-align: center;
+  margin: 0;
 }
 
-/* Loading skeletons */
+.themeToggleBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1.1rem;
+  background: #ffffff;
+  border: 1px solid rgba(15, 23, 42, 0.05);
+  border-radius: 20px;
+  color: #64748b;
+  font-size: 0.8rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  align-self: center;
+}
+
+.themeToggleBtn:hover {
+  background: #f8fafc;
+  color: #0052e0;
+}
+
+/* Skeleton Hydration Loaders */
 .skeletonContainer {
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 0.75rem;
   width: 100%;
-  margin: 1rem 0;
 }
 
 .skeletonLine {
-  width: 85%;
+  width: 95%;
   height: 14px;
-  background: linear-gradient(90deg, rgba(255, 255, 255, 0.03) 25%, rgba(255, 255, 255, 0.08) 50%, rgba(255, 255, 255, 0.03) 75%);
+  background: linear-gradient(90deg, #f1f5f9 25%, #e2e8f0 50%, #f1f5f9 75%);
   background-size: 200% 100%;
   border-radius: 6px;
   animation: skeletonShimmer 1.5s infinite;
 }
 
 .skeletonLineShort {
-  width: 65%;
+  width: 75%;
   height: 14px;
-  background: linear-gradient(90deg, rgba(255, 255, 255, 0.03) 25%, rgba(255, 255, 255, 0.08) 50%, rgba(255, 255, 255, 0.03) 75%);
+  background: linear-gradient(90deg, #f1f5f9 25%, #e2e8f0 50%, #f1f5f9 75%);
   background-size: 200% 100%;
   border-radius: 6px;
   animation: skeletonShimmer 1.5s infinite;
@@ -662,13 +572,12 @@
   gap: 0.5rem;
   width: 100%;
   justify-content: center;
-  margin-top: 0.25rem;
 }
 
 .skeletonChip {
   width: 80px;
   height: 26px;
-  background: linear-gradient(90deg, rgba(255, 255, 255, 0.03) 25%, rgba(255, 255, 255, 0.08) 50%, rgba(255, 255, 255, 0.03) 75%);
+  background: linear-gradient(90deg, #f1f5f9 25%, #e2e8f0 50%, #f1f5f9 75%);
   background-size: 200% 100%;
   border-radius: 20px;
   animation: skeletonShimmer 1.5s infinite;
@@ -679,212 +588,14 @@
   100% { background-position: -200% 0; }
 }
 
+/* Mobile Screen Viewports */
 @media (max-width: 480px) {
   .wrapper {
-    padding: 0;
-    align-items: flex-start;
+    padding: 1rem 0.75rem;
+    background: #f1f5f9;
   }
   .card {
-    background: transparent;
-    border: none;
-    border-radius: 0;
-    box-shadow: none;
-    backdrop-filter: none;
-    -webkit-backdrop-filter: none;
-    padding: 2.5rem 1.5rem;
-    max-width: 100%;
-    width: 100%;
-    min-height: 100vh;
+    border-radius: 24px;
+    padding: 1.75rem 1.25rem;
   }
-  .name {
-    font-size: 1.6rem;
-  }
-}
-
-.themeToggleBtn {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  margin-top: 1.5rem;
-  padding: 0.55rem 1.2rem;
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.06);
-  border-radius: 20px;
-  color: #9ca3af;
-  font-size: 0.8rem;
-  font-weight: 700;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  z-index: 2;
-  align-self: center;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-}
-
-.themeToggleBtn:hover {
-  background: rgba(255, 255, 255, 0.07);
-  color: #fff;
-  border-color: rgba(255, 255, 255, 0.12);
-  transform: translateY(-1px);
-}
-
-.toggleIcon {
-  font-size: 0.95rem;
-}
-
-/* ==================== LIGHT MODE OVERRIDES ==================== */
-.lightMode {
-  background: #f8fafc !important;
-}
-
-.lightMode .gridOverlay {
-  background-image: 
-    linear-gradient(rgba(0, 0, 0, 0.02) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(0, 0, 0, 0.02) 1px, transparent 1px) !important;
-}
-
-.lightMode .backgroundGlowBlob1 {
-  background: radial-gradient(circle, rgba(99, 102, 241, 0.06) 0%, rgba(99, 102, 241, 0) 70%) !important;
-}
-
-.lightMode .backgroundGlowBlob2 {
-  background: radial-gradient(circle, rgba(168, 85, 247, 0.06) 0%, rgba(168, 85, 247, 0) 70%) !important;
-}
-
-.lightMode .card {
-  background: rgba(255, 255, 255, 0.7) !important;
-  border-color: rgba(0, 0, 0, 0.07) !important;
-  box-shadow: 
-    0 30px 60px rgba(15, 23, 42, 0.08), 
-    0 0 100px rgba(99, 102, 241, 0.02),
-    0 0 0 1px rgba(255, 255, 255, 0.6) inset !important;
-}
-
-@media (max-width: 480px) {
-  .lightMode .card {
-    background: transparent !important;
-    border: none !important;
-    box-shadow: none !important;
-  }
-}
-
-.lightMode .logoMark {
-  color: #0f172a !important;
-}
-
-.lightMode .name {
-  color: #0f172a !important;
-}
-
-.lightMode .tagline {
-  color: #475569 !important;
-}
-
-.lightMode .bio {
-  color: #334155 !important;
-}
-
-.lightMode .roleTag {
-  background: rgba(99, 102, 241, 0.06) !important;
-  border-color: rgba(99, 102, 241, 0.15) !important;
-  color: #4f46e5 !important;
-}
-
-.lightMode .locationTag {
-  background: rgba(16, 185, 129, 0.06) !important;
-  border-color: rgba(16, 185, 129, 0.15) !important;
-  color: #059669 !important;
-}
-
-.lightMode .statsRow {
-  background: rgba(0, 0, 0, 0.015) !important;
-  border-color: rgba(0, 0, 0, 0.04) !important;
-  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.05) !important;
-}
-
-.lightMode .statVal {
-  color: #0f172a !important;
-}
-
-.lightMode .statLabel {
-  color: #64748b !important;
-}
-
-.lightMode .statBoxDivider {
-  background: rgba(0, 0, 0, 0.06) !important;
-}
-
-.lightMode .sectionTitle {
-  color: #64748b !important;
-  border-bottom-color: rgba(0, 0, 0, 0.04) !important;
-}
-
-.lightMode .socialCard {
-  background: rgba(0, 0, 0, 0.012) !important;
-  border-color: rgba(0, 0, 0, 0.04) !important;
-}
-
-.lightMode .socialCard:hover {
-  background: rgba(0, 0, 0, 0.025) !important;
-  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.04) !important;
-}
-
-.lightMode .platform {
-  color: #0f172a !important;
-}
-
-.lightMode .handle {
-  color: #64748b !important;
-}
-
-.lightMode .arrowIcon {
-  color: #94a3b8 !important;
-}
-
-.lightMode .socialCard:hover .arrowIcon {
-  color: #0f172a !important;
-}
-
-.lightMode .viewProfileLink {
-  background: rgba(0, 0, 0, 0.015) !important;
-  color: #475569 !important;
-  border-color: rgba(0, 0, 0, 0.05) !important;
-}
-
-.lightMode .viewProfileLink:hover {
-  background: rgba(0, 0, 0, 0.035) !important;
-  color: #0f172a !important;
-  border-color: rgba(0, 0, 0, 0.08) !important;
-}
-
-.lightMode .themeToggleBtn {
-  background: rgba(0, 0, 0, 0.02) !important;
-  border-color: rgba(0, 0, 0, 0.06) !important;
-  color: #475569 !important;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05) !important;
-}
-
-.lightMode .themeToggleBtn:hover {
-  background: rgba(0, 0, 0, 0.04) !important;
-  color: #0f172a !important;
-  border-color: rgba(0, 0, 0, 0.1) !important;
-}
-
-.lightMode .statusBadgeLoading {
-  background: rgba(0, 0, 0, 0.02) !important;
-  color: #475569 !important;
-  border-color: rgba(0, 0, 0, 0.05) !important;
-}
-
-.lightMode .statusBadgeLoading .miniSpinner {
-  border-top-color: #475569 !important;
-  border-left-color: rgba(0, 0, 0, 0.05) !important;
-  border-right-color: rgba(0, 0, 0, 0.05) !important;
-  border-bottom-color: rgba(0, 0, 0, 0.05) !important;
-}
-
-.lightMode .skeletonLine,
-.lightMode .skeletonLineShort,
-.lightMode .skeletonChip {
-  background: linear-gradient(90deg, rgba(0, 0, 0, 0.02) 25%, rgba(0, 0, 0, 0.05) 50%, rgba(0, 0, 0, 0.02) 75%) !important;
-  background-size: 200% 100% !important;
 }

@@ -16,7 +16,12 @@ interface ConnectClientPageProps {
   isLoggedIn: boolean;
 }
 
-// Modern Platform Icon Renderer
+// Helper to check user online status
+const getIsOnline = (profileData: any) => {
+  return profileData?.isOnline !== false;
+};
+
+// Platform Custom Icon Renderer with Telegram, Behance, Resume & Link support
 const getPlatformIcon = (platform: string) => {
   const p = platform.toLowerCase();
   if (p.includes('github')) {
@@ -54,11 +59,93 @@ const getPlatformIcon = (platform: string) => {
       </svg>
     );
   }
+  if (p.includes('whatsapp')) {
+    return (
+      <svg className={styles.socialSvg} fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+        <path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946C.06 5.348 5.397.01 12.008.01c3.202.001 6.212 1.246 8.477 3.514 2.266 2.268 3.507 5.28 3.505 8.484-.004 6.657-5.34 11.997-11.953 11.997-2.005-.001-3.973-.502-5.717-1.456L0 24zm6.59-4.846c1.6.95 3.188 1.449 4.825 1.451 5.436 0 9.86-4.413 9.863-9.83.001-2.624-1.013-5.092-2.859-6.944-1.846-1.853-4.306-2.873-6.93-2.875-5.437 0-9.863 4.414-9.866 9.833-.001 1.762.478 3.486 1.385 5.018l-.995 3.637 3.762-.99zM17.72 14.88c-.31-.155-1.832-.903-2.113-1.005-.28-.102-.485-.155-.688.155-.203.31-.787.983-.965 1.187-.177.203-.355.228-.665.073-1.077-.54-1.867-1.01-2.6-1.64-.574-.492-.942-1.084-1.055-1.278-.113-.193-.012-.298.086-.395.09-.088.203-.228.305-.34.1-.114.133-.19.2-.317.066-.127.033-.24-.017-.343-.05-.102-.485-1.168-.665-1.6-.174-.42-.35-.363-.48-.363-.125-.002-.27-.002-.413-.002-.143 0-.376.053-.572.27-.197.216-.75.733-.75 1.79 0 1.057.77 2.08.877 2.224.11.143 1.516 2.313 3.67 3.242.513.22 1.05.353 1.536.505.518.163.99.14 1.36.084.412-.06 1.832-.75 2.087-1.472.254-.722.254-1.343.178-1.473-.076-.13-.28-.203-.59-.358z"/>
+      </svg>
+    );
+  }
+  if (p.includes('telegram')) {
+    return (
+      <svg className={styles.socialSvg} fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+        <path d="M12 0C5.37 0 0 5.37 0 12s5.37 12 12 12 12-5.37 12-12S18.63 0 12 0zm5.56 8.61l-1.92 9.07c-.14.65-.53.81-1.08.5l-2.93-2.16-1.41 1.36c-.16.16-.29.29-.6.29l.21-2.97 5.41-4.89c.23-.21-.05-.32-.36-.12L8.2 14.51l-2.88-.9c-.63-.2-1.07-.63.04-.9L16.2 4.9c.5-.18 1 .16.8.96z"/>
+      </svg>
+    );
+  }
+  if (p.includes('behance')) {
+    return (
+      <svg className={styles.socialSvg} fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+        <path d="M8.2 20H3V4h5.2a4 4 0 011.6.3 3.6 3.6 0 012.3 3.4 3.4 0 01-1.1 2.6 3.8 3.8 0 011.6 3.2v.3A4.2 4.2 0 0110.9 18a4.6 4.6 0 01-2.7 2zm.2-9.6H5v3.1h3.4A1.6 1.6 0 0010 12a1.5 1.5 0 00-1.6-1.6zm-.2-4.4H5V9h3.2a1.5 1.5 0 001.5-1.5A1.5 1.5 0 008.2 6zm13.8 6.5h-7.6a3.8 3.8 0 00.9 2.5 3.3 3.3 0 002.5.9 3.5 3.5 0 002.8-1.2l1.4 1A5.3 5.3 0 0117.8 18c-3.1 0-5.3-2.2-5.3-5.5S14.7 7 17.7 7c2.8 0 4.9 2 4.9 5v.5zM17.6 9c-1 0-1.8.6-2.1 1.5h4.2c0-1-.8-1.5-2.1-1.5zm.9-4.5H15V6h3.5V4.5z"/>
+      </svg>
+    );
+  }
+  if (p.includes('resume') || p.includes('cv') || p.includes('download')) {
+    return (
+      <svg className={styles.socialSvg} fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+        <path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/>
+      </svg>
+    );
+  }
+  if (p.includes('portfolio') || p.includes('link') || p.includes('website')) {
+    return (
+      <svg className={styles.socialSvg} fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+        <path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"/>
+      </svg>
+    );
+  }
   return (
     <svg className={styles.socialSvg} fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
       <path strokeLinecap="round" strokeLinejoin="round" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
     </svg>
   );
+};
+
+// Platform Custom App icon Background Colors
+const getPlatformColor = (platform: string, customColor?: string) => {
+  if (customColor) return customColor;
+  const p = platform.toLowerCase();
+  if (p.includes('instagram')) return 'linear-gradient(135deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%)';
+  if (p.includes('linkedin')) return '#0a66c2';
+  if (p.includes('telegram')) return '#229ed9';
+  if (p.includes('whatsapp')) return '#25d366';
+  if (p.includes('behance')) return '#0057ff';
+  if (p.includes('github')) return '#181717';
+  if (p.includes('twitter') || p.includes('x.com')) return '#000000';
+  if (p.includes('youtube')) return '#ff0000';
+  if (p.includes('resume') || p.includes('cv') || p.includes('download')) return '#2563eb';
+  if (p.includes('portfolio') || p.includes('link') || p.includes('website')) return '#1d4ed8';
+  return '#64748b';
+};
+
+// SVG Icon selector for profile tag items
+const getTagIcon = (text: string, type: string) => {
+  const t = text.toLowerCase();
+  if (type === 'role' || t.includes('designer') || t.includes('developer') || t.includes('creator')) {
+    if (t.includes('creator') || t.includes('artist') || t.includes('media') || t.includes('video')) {
+      // Video camera
+      return (
+        <svg width="12" height="12" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <path d="M23 6.999l-7 5.6v-4.6c0-.55-.45-1-1-1h-14c-.55 0-1 .45-1 1v10c0 .55.45 1 1 1h14c.55 0 1-.45 1-1v-4.6l7 5.6v-13z"/>
+        </svg>
+      );
+    }
+    // Profile User silhouette
+    return (
+      <svg width="12" height="12" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+        <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+      </svg>
+    );
+  }
+  if (type === 'location' || t.includes('india') || t.includes('bangalore') || t.includes('earth')) {
+    // Map pin marker
+    return (
+      <svg width="12" height="12" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+        <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
+      </svg>
+    );
+  }
+  return '⚡';
 };
 
 export default function ConnectClientPage({
@@ -68,7 +155,6 @@ export default function ConnectClientPage({
 }: ConnectClientPageProps) {
   const router = useRouter();
   const [profileData, setProfileData] = useState<any>(null);
-  const [isLightMode, setIsLightMode] = useState(false);
   const [status, setStatus] = useState<string | null>(null);
   
   const [loadingProfile, setLoadingProfile] = useState(true);
@@ -121,7 +207,6 @@ export default function ConnectClientPage({
 
   const handleConnect = async () => {
     if (!isLoggedIn) {
-      // 3-layer intent preservation
       sessionStorage.setItem('pendingIntent', `connect:${username}`);
       localStorage.setItem('pendingIntent', `connect:${username}`);
       router.push(`/login?redirect=/connect/${username}&intent=connect`);
@@ -151,15 +236,41 @@ export default function ConnectClientPage({
 
   const renderTags = () => {
     const tags = profileData?.tags || [];
-    if (tags.length === 0) return null;
+    if (tags.length === 0) {
+      // Return beautiful default tags if not yet fetched
+      return (
+        <div className={styles.tagsStack}>
+          <div className={styles.profileTag}>
+            <div className={styles.tagIconWrapper}>
+              {getTagIcon('UI/UX Designer', 'role')}
+            </div>
+            <span>UI/UX Designer</span>
+          </div>
+          <div className={styles.profileTag}>
+            <div className={styles.tagIconWrapper}>
+              {getTagIcon('Digital Creator', 'role')}
+            </div>
+            <span>Digital Creator</span>
+          </div>
+          <div className={styles.profileTag}>
+            <div className={styles.tagIconWrapper}>
+              {getTagIcon('Bangalore, India', 'location')}
+            </div>
+            <span>Bangalore, India</span>
+          </div>
+        </div>
+      );
+    }
     return (
-      <div className={styles.tagsContainer}>
+      <div className={styles.tagsStack}>
         {tags.map((t: any) => {
-          const isLoc = t.type === 'location';
           return (
-            <span key={t.id} className={isLoc ? styles.locationTag : styles.roleTag}>
-              <span className={styles.tagEmoji}>{isLoc ? '📍' : '⚡'}</span> {t.text}
-            </span>
+            <div key={t.id} className={styles.profileTag}>
+              <div className={styles.tagIconWrapper}>
+                {getTagIcon(t.text, t.type)}
+              </div>
+              <span>{t.text}</span>
+            </div>
           );
         })}
       </div>
@@ -170,8 +281,10 @@ export default function ConnectClientPage({
     const socials = profileData?.socials || [];
     if (socials.length === 0) return null;
     return (
-      <div className={styles.socialsSection}>
-        <h3 className={styles.sectionTitle}>Link Tree</h3>
+      <div className={styles.linkTreeCard}>
+        <div className={styles.linkTreeHeader}>
+          <span>•••</span> Connect with me <span>•••</span>
+        </div>
         <div className={styles.socialList}>
           {socials.map((link: any) => {
             return (
@@ -180,22 +293,23 @@ export default function ConnectClientPage({
                 href={link.url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className={styles.socialCard}
-                style={{ '--platform-color': link.color } as React.CSSProperties}
+                className={styles.socialRow}
               >
-                <div className={styles.socialCardGlow} style={{ background: `${link.color}15` }}></div>
-                <div className={styles.socialLeft}>
-                  <div className={styles.iconCircle} style={{ color: link.color, background: `${link.color}18` }}>
+                <div className={styles.socialRowLeft}>
+                  <div 
+                    className={styles.socialIconWrapper} 
+                    style={{ background: getPlatformColor(link.platform, link.color) }}
+                  >
                     {getPlatformIcon(link.platform)}
                   </div>
-                  <div className={styles.socialInfo}>
-                    <span className={styles.platform}>{link.platform}</span>
-                    <span className={styles.handle}>{link.handle}</span>
+                  <div className={styles.socialLabels}>
+                    <span className={styles.socialPlatformName}>{link.platform}</span>
+                    <span className={styles.socialPlatformHandle}>{link.handle}</span>
                   </div>
                 </div>
-                <span className={styles.arrowIcon}>
-                  <svg fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 19.5l15-15m0 0H8.25m11.25 0v11.25" />
+                <span className={styles.socialRowRight}>
+                  <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
                   </svg>
                 </span>
               </a>
@@ -207,90 +321,65 @@ export default function ConnectClientPage({
   };
 
   return (
-    <div className={`${styles.wrapper} ${isLightMode ? styles.lightMode : ''}`}>
-      {/* Dynamic Background Effects */}
-      <div className={styles.backgroundGlowBlob1}></div>
-      <div className={styles.backgroundGlowBlob2}></div>
-      <div className={styles.gridOverlay}></div>
-
+    <div className={styles.wrapper}>
       <div className={styles.card}>
-        {/* Holographic shimmer line */}
-        <div className={styles.shimmerOverlay}></div>
-
-        {/* Card Header Design Elements */}
+        
+        {/* Top Bar Logo and Counter */}
         <div className={styles.cardTopBar}>
-          <div className={styles.nfcChip}>
-            <div className={styles.nfcInnerPattern}></div>
-          </div>
           <div className={styles.logoMark}>
-            Tap<span>folio</span>
+            <div className={styles.logoIcon}>T</div>
+            <span className={styles.logoText}>tapfolio</span>
+          </div>
+          
+          <div className={styles.pointsCapsule}>
+            <span>💎 {profileData?.diamonds || '12000'}</span>
+            <div className={styles.pointsPlusBtn}>+</div>
           </div>
         </div>
 
-        {/* Profile Basic Details */}
-        <div className={styles.avatarWrapper}>
-          <img
-            src={profile.avatar || '/profile_avatar.png'}
-            alt={profile.name}
-            className={styles.avatar}
-          />
-          <div className={styles.avatarRing}></div>
-          {profileData?.isPremium && (
-            <div className={styles.premiumBadge}>
-              <span className={styles.premiumBadgeIcon}>💎</span> PRO
-            </div>
-          )}
+        {/* Profile Name & Squiggly tagline */}
+        <div className={styles.profileIntro}>
+          <div className={styles.greetingText}>👋 Hey, i am</div>
+          <h1 className={styles.name}>{profile.name}</h1>
+          <div className={styles.squigglyUnderline}>{profile.tagline || "Let's connect!"}</div>
         </div>
 
-        <h1 className={styles.name}>{profile.name}</h1>
-        {profile.tagline && <p className={styles.tagline}>{profile.tagline}</p>}
-
-        {/* Loading Skeleton / Profile Hydration */}
-        {loadingProfile ? (
-          <div className={styles.skeletonContainer}>
-            <div className={styles.skeletonLine}></div>
-            <div className={styles.skeletonLineShort}></div>
-            <div className={styles.skeletonChips}>
-              <div className={styles.skeletonChip}></div>
-              <div className={styles.skeletonChip}></div>
-            </div>
-          </div>
-        ) : (
-          <>
-            {/* Bio Section */}
-            {profileData?.bio && (
-              <p className={styles.bio}>
-                {profileData.bio}
-              </p>
+        {/* Profile Avatar double border and active status + Tags Stack side-by-side */}
+        <div className={styles.profileIdentityRow}>
+          <div className={styles.avatarWrapper}>
+            <img
+              src={profile.avatar || '/profile_avatar.png'}
+              alt={profile.name}
+              className={styles.avatar}
+            />
+            {getIsOnline(profileData) && (
+              <div className={styles.onlineIndicator} title="Online now"></div>
             )}
+          </div>
 
-            {/* Tags (Roles/Locations) */}
-            {renderTags()}
+          {/* Tags Stack on the right side */}
+          {renderTags()}
+        </div>
 
-            {/* Stats Row */}
-            <div className={styles.statsRow}>
-              <div className={styles.statBox}>
-                <span className={styles.statVal}>{profileData?.diamonds || '0'}</span>
-                <span className={styles.statLabel}>Points</span>
-              </div>
-              <div className={styles.statBoxDivider}></div>
-              <div className={styles.statBox}>
-                <span className={styles.statVal}>{profileData?.connectionCount || '0'}</span>
-                <span className={styles.statLabel}>Connections</span>
-              </div>
-              <div className={styles.statBoxDivider}></div>
-              <div className={styles.statBox}>
-                <span className={styles.statVal}>{profileData?.tapCount || '0'}</span>
-                <span className={styles.statLabel}>Taps</span>
-              </div>
-            </div>
-
-            {/* Social Links List */}
-            {renderSocials()}
-          </>
+        {/* Bio text block with highlighted words */}
+        {profileData?.bio && (
+          <p className={styles.bioText}>
+            {profileData.bio.includes('connect brands') ? (
+              <>
+                {profileData.bio.split('connect brands')[0]}
+                <strong>connect brands</strong>
+                {profileData.bio.split('connect brands')[1]}
+              </>
+            ) : (
+              profileData.bio
+            )}
+          </p>
         )}
 
-        {/* Action Button & Badges */}
+        {/* Social Links tree white card */}
+        {renderSocials()}
+
+        {/* Main Action Buttons */}
         <div className={styles.actions}>
           {loadingStatus ? (
             <div className={styles.statusBadgeLoading}>
@@ -339,23 +428,17 @@ export default function ConnectClientPage({
 
         {error && <p className={styles.error}>{error}</p>}
 
-        <button 
-          onClick={() => setIsLightMode(!isLightMode)} 
-          className={styles.themeToggleBtn}
-          aria-label="Toggle light and dark mode"
-        >
-          {isLightMode ? (
-            <>
-              <span className={styles.toggleIcon}>🌙</span>
-              <span>Dark Mode</span>
-            </>
-          ) : (
-            <>
-              <span className={styles.toggleIcon}>☀️</span>
-              <span>Light Mode</span>
-            </>
-          )}
-        </button>
+        {/* Quote Banner with script signature */}
+        <div className={styles.quoteBanner}>
+          <div className={styles.quoteLeftIcon}>“</div>
+          <p className={styles.quoteText}>
+            Design is not just what it looks like, it's how it connects.
+          </p>
+          <div className={styles.quoteSignature}>
+            {profile.name}
+          </div>
+        </div>
+
       </div>
     </div>
   );
