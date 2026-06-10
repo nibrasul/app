@@ -157,10 +157,23 @@ export default function ConnectClientPage({
 }: ConnectClientPageProps) {
   const router = useRouter();
   const [profileData, setProfileData] = useState<any>(null);
-  
-  // Accordion Expand/Collapse States (Collapsed by default to keep screen compact without scrolling)
-  const [aboutOpen, setAboutOpen] = useState(false);
-  const [contactOpen, setContactOpen] = useState(false);
+  const [theme, setTheme] = useState<'light' | 'dark'>('light');
+
+  useEffect(() => {
+    const savedTheme = localStorage.getItem('theme') as 'light' | 'dark' | null;
+    if (savedTheme) {
+      setTheme(savedTheme);
+    } else {
+      const systemPreference = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      setTheme(systemPreference ? 'dark' : 'light');
+    }
+  }, []);
+
+  const toggleTheme = () => {
+    const nextTheme = theme === 'light' ? 'dark' : 'light';
+    setTheme(nextTheme);
+    localStorage.setItem('theme', nextTheme);
+  };
 
   const [loadingProfile, setLoadingProfile] = useState(true);
   const [loadingAction, setLoadingAction] = useState(false);
@@ -329,12 +342,34 @@ END:VCARD`;
   const contactItems = getContactInfoItems();
 
   return (
-    <div className={styles.wrapper}>
+    <div className={`${styles.wrapper} ${theme === 'dark' ? styles.darkTheme : ''}`}>
       <div className={styles.card}>
         
         {/* Top Navigation Bar */}
         <div className={styles.cardTopBar}>
           <span className={styles.logoText}>Tapfolio</span>
+
+          {/* Theme Toggle Button */}
+          <button className={styles.themeToggleBtn} onClick={toggleTheme} aria-label="Toggle theme">
+            {theme === 'light' ? (
+              <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
+              </svg>
+            ) : (
+              <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="12" cy="12" r="5" />
+                <line x1="12" y1="1" x2="12" y2="3" />
+                <line x1="12" y1="21" x2="12" y2="23" />
+                <line x1="4.22" y1="4.22" x2="5.64" y2="5.64" />
+                <line x1="18.36" y1="18.36" x2="19.78" y2="19.78" />
+                <line x1="1" y1="12" x2="3" y2="12" />
+                <line x1="21" y1="12" x2="23" y2="12" />
+                <line x1="4.22" y1="19.78" x2="5.64" y2="18.36" />
+                <line x1="18.36" y1="5.64" x2="19.78" y2="4.22" />
+              </svg>
+            )}
+          </button>
+
           <button className={styles.shareButton} onClick={handleShare} aria-label="Share profile">
             <svg width="22" height="22" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
               <path strokeLinecap="round" strokeLinejoin="round" d="M9 8.25H7.5a2.25 2.25 0 0 0-2.25 2.25v9a2.25 2.25 0 0 0 2.25 2.25h9a2.25 2.25 0 0 0 2.25-2.25V10.5a2.25 2.25 0 0 0-2.25-2.25H15M9 12l3-3m0 0l3 3m-3-3v12" />
@@ -403,76 +438,6 @@ END:VCARD`;
               </a>
             );
           })}
-        </div>
-
-        {/* Accordion Expandable Information Card */}
-        <div className={styles.accordionCard}>
-          {/* About Me Section */}
-          {(profileData?.bio || loadingProfile) && (
-            <div className={styles.accordionSection}>
-              <div className={styles.accordionRow} onClick={() => setAboutOpen(!aboutOpen)}>
-                <div className={styles.accordionRowLeft}>
-                  <span className={styles.accordionIcon}>
-                    <svg width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0zM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
-                    </svg>
-                  </span>
-                  <span className={styles.accordionTitle}>About Me</span>
-                </div>
-                <span className={`${styles.accordionChevron} ${aboutOpen ? styles.chevronOpen : ''}`}>
-                  <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
-                  </svg>
-                </span>
-              </div>
-              
-              {/* Expandable Bio Text block */}
-              {aboutOpen && (
-                <div className={styles.aboutContent}>
-                  {profileData?.bio || 'Photographer and visual storyteller specializing in weddings, brands, and commercial campaigns.'}
-                </div>
-              )}
-            </div>
-          )}
-
-          {/* Divider line between accordion sections (only if both are shown) */}
-          {(profileData?.bio || loadingProfile) && contactItems.length > 0 && (
-            <div className={styles.accordionDivider} />
-          )}
-
-          {/* Contact Details Section */}
-          {contactItems.length > 0 && (
-            <div className={styles.accordionSection}>
-              <div className={styles.accordionRow} onClick={() => setContactOpen(!contactOpen)}>
-                <div className={styles.accordionRowLeft}>
-                  <span className={styles.accordionIcon}>
-                    <svg width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M15 10.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0z" />
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1 1 15 0z" />
-                    </svg>
-                  </span>
-                  <span className={styles.accordionTitle}>Contact</span>
-                </div>
-                <span className={`${styles.accordionChevron} ${contactOpen ? styles.chevronOpen : ''}`}>
-                  <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
-                  </svg>
-                </span>
-              </div>
-
-              {/* Expandable Contact details list items */}
-              {contactOpen && (
-                <div className={styles.contactContent}>
-                  {contactItems.map((item, idx) => (
-                    <a key={idx} href={item.href} target="_blank" rel="noopener noreferrer" className={styles.contactInfoItem}>
-                      <span className={styles.contactInfoLabel}>{item.label}</span>
-                      <span className={styles.contactInfoValue}>{item.val}</span>
-                    </a>
-                  ))}
-                </div>
-              )}
-            </div>
-          )}
         </div>
 
         {error && <p className={styles.error}>{error}</p>}
