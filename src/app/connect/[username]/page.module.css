@@ -21,16 +21,18 @@
   transition: background-color 0.3s ease, color 0.3s ease;
 }
 
-/* Dark Mode Variables Override */
-.darkTheme {
-  --bg-color: #0f172a;
-  --card-bg-color: #1e293b;
-  --primary-text: #f8fafc;
-  --secondary-text: #cbd5e1;
-  --primary-purple: #a78bfa;
-  --border-color: #334155;
-  --pill-bg: #334155;
-  --pill-text: #cbd5e1;
+/* Dark Mode Automatically Handled Natively via Device Preferences */
+@media (prefers-color-scheme: dark) {
+  .wrapper {
+    --bg-color: #0f172a;
+    --card-bg-color: #1e293b;
+    --primary-text: #f8fafc;
+    --secondary-text: #cbd5e1;
+    --primary-purple: #a78bfa;
+    --border-color: #334155;
+    --pill-bg: #334155;
+    --pill-text: #cbd5e1;
+  }
 }
 
 /* Premium Card container centering */
@@ -281,35 +283,7 @@
   margin: 0;
 }
 
-/* Floating Theme Toggle Button */
-.floatingThemeBtn {
-  position: fixed;
-  bottom: 24px;
-  right: 24px;
-  width: 46px;
-  height: 46px;
-  border-radius: 50%;
-  background: var(--card-bg-color);
-  border: 1px solid var(--border-color);
-  color: var(--primary-text);
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.12);
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 999;
-  transition: all 0.3s ease;
-}
 
-.floatingThemeBtn:hover {
-  transform: scale(1.08);
-  border-color: var(--primary-purple);
-  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.18);
-}
-
-.floatingThemeBtn:active {
-  transform: scale(0.95);
-}
 
 /* Responsive Overrides */
 @media (max-width: 480px) {
