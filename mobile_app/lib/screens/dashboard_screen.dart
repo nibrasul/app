@@ -7,6 +7,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../models/profile.dart';
 import '../services/api_service.dart';
+import '../widgets/image_crop_dialog.dart';
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({Key? key}) : super(key: key);
@@ -226,16 +227,26 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   Future<void> _pickAndUploadImage() async {
     try {
-      final XFile? image = await _picker.pickImage(source: ImageSource.gallery, maxWidth: 500);
+      final XFile? image = await _picker.pickImage(source: ImageSource.gallery);
       if (image == null) return;
 
       final bytes = await image.readAsBytes();
-      final base64Image = base64Encode(bytes);
-      final mimeType = image.mimeType ?? 'image/png';
+      if (!mounted) return;
+
+      final croppedBytes = await showDialog<Uint8List>(
+        context: context,
+        barrierDismissible: false,
+        builder: (context) => ImageCropDialog(imageBytes: bytes),
+      );
+
+      if (croppedBytes == null) return;
 
       setState(() {
         _saving = true;
       });
+
+      final base64Image = base64Encode(croppedBytes);
+      const mimeType = 'image/png';
 
       final result = await _apiService.uploadAvatar(base64Image, mimeType);
       if (result['success'] == true) {
@@ -249,7 +260,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
             _checklist = saveRes['checklist'];
           });
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Avatar uploaded successfully!'), backgroundColor: Color(0xFF10B981)),
+            const SnackBar(content: Text('Avatar cropped & uploaded successfully!'), backgroundColor: Color(0xFF10B981)),
           );
         }
       } else {
@@ -259,12 +270,14 @@ class _DashboardScreenState extends State<DashboardScreen> {
       }
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error picking image: $e'), backgroundColor: Colors.redAccent),
+        SnackBar(content: Text('Error picking or cropping image: $e'), backgroundColor: Colors.redAccent),
       );
     } finally {
-      setState(() {
-        _saving = false;
-      });
+      if (mounted) {
+        setState(() {
+          _saving = false;
+        });
+      }
     }
   }
 

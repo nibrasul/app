@@ -11,14 +11,17 @@
     "@prisma/adapter-pg": "^7.8.0",
     "@prisma/client": "^7.8.0",
     "bcryptjs": "^3.0.3",
+    "framer-motion": "^12.40.0",
     "jose": "^6.2.3",
     "jsonwebtoken": "^9.0.3",
+    "lucide-react": "^1.18.0",
     "next": "16.2.7",
     "pg": "^8.21.0",
     "react": "19.2.4",
     "react-dom": "19.2.4"
   },
   "devDependencies": {
+    "@tailwindcss/postcss": "^4.3.0",
     "@types/bcryptjs": "^2.4.6",
     "@types/jsonwebtoken": "^9.0.10",
     "@types/node": "^20",
@@ -26,6 +29,7 @@
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "prisma": "^7.8.0",
+    "tailwindcss": "^4.3.0",
     "typescript": "^5"
   }
 }

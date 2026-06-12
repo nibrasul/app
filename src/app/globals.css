@@ -1,3 +1,18 @@
+@import "tailwindcss";
+
+@theme {
+  --color-accent: #0f172a;
+  --color-accent-purple: #4f46e5;
+  --color-accent-warm: #ea580c;
+  --color-bg-primary: #FFFFFF;
+  --color-bg-secondary: #f8fafc;
+  --color-bg-card: #FFFFFF;
+  --color-text-primary: #0f172a;
+  --color-text-secondary: #475569;
+  --color-text-muted: #94a3b8;
+  --color-border: #e2e8f0;
+}
+
 :root {
   /* Premium Dark Theme Color Tokens */
   --bg-primary: #0b0c10;
